@@ -1,9 +1,11 @@
 # Proyecto_Estructura_datos
 
 Proyecto Integrador Estructura Datos
+Sistema de Gestión de Cine
 
+Sistema desarrollado como proyecto académico para la asignatura de Estructuras de Datos, cuyo objetivo es simular la administración de un cine mediante la implementación de diferentes estructuras de datos fundamentales.
 
-
+El sistema permite gestionar funciones, salas, asientos, clientes y la venta de entradas, utilizando cada estructura de datos para resolver un problema específico dentro de la aplicación.
 
 
 
