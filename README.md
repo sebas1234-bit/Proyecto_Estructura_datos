@@ -8,24 +8,23 @@ Sistema desarrollado como proyecto académico para la asignatura de Estructuras 
 
 El sistema permite gestionar funciones, salas, asientos, clientes y la venta de entradas, utilizando cada estructura de datos para resolver un problema específico dentro de la aplicación.
 
+## 🎯 Objetivos
 
+- Aplicar los conceptos de estructuras de datos en un caso de uso real.
+- Implementar las estructuras de forma práctica dentro de un sistema funcional.
+- Comprender el funcionamiento y la utilidad de cada estructura en diferentes escenarios.
 
+## 🧩 Estructuras de datos implementadas
 
-Objetivos
-
-* Aplicar los conceptos de estructuras de datos en un caso de uso real.
-* Implementar las estructuras de forma práctica dentro de un sistema funcional.
-* Comprender el funcionamiento y la utilidad de cada estructura en diferentes escenarios.
-
-Estructuras de datos implementadas
-
-* Vectores: almacenamiento del catálogo de películas.
-* Matrices: representación de la distribución de asientos en cada sala de cine.
-* Colas: gestión de clientes en espera para la compra de entradas.
-* Pilas: registro de las últimas operaciones realizadas, como compras o cancelaciones.
-* Listas enlazadas simples: administración de las entradas adquiridas por cada cliente.
-* Listas enlazadas dobles: historial de funciones o ventas con recorrido en ambos sentidos.
-* Árboles binarios: búsqueda eficiente de películas o clientes mediante un código identificador.
+| Estructura | Aplicación en el proyecto |
+|---|---|
+| **Vectores** | Almacenamiento del catálogo de películas. |
+| **Matrices** | Representación de la distribución de asientos en cada sala de cine. |
+| **Colas** | Gestión de clientes en espera para la compra de entradas. |
+| **Pilas** | Registro de las últimas operaciones realizadas, como compras o cancelaciones. |
+| **Listas enlazadas simples** | Administración de las entradas adquiridas por cada cliente. |
+| **Listas enlazadas dobles** | Historial de funciones o ventas, con recorrido en ambos sentidos. |
+| **Árboles binarios** | Búsqueda eficiente de películas o clientes mediante un código identificador. |
 
 Funcionalidades principales
 
