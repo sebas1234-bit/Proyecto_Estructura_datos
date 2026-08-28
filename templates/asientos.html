@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cine Santa Fe - Asientos</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <link rel="stylesheet" href="../static/css/styles.css">
+    <style>
+        .contenedor-sala {
+            max-width: 700px;
+            margin: 40px auto;
+            padding: 20px;
+            text-align: center;
+        }
+        .pantalla {
+            background: #333;
+            color: white;
+            padding: 10px;
+            border-radius: 6px;
+            margin-bottom: 30px;
+            letter-spacing: 4px;
+        }
+        .fila-asientos {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin-bottom: 10px;
+        }
+        .asiento {
+            width: 40px;
+            height: 40px;
+            border-radius: 6px 6px 12px 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.75rem;
+            font-weight: bold;
+            color: white;
+        }
+        .libre {
+            background-color: #4caf50;
+        }
+        .ocupado {
+            background-color: #e50914;
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg">
+        <a class="navbar-brand" href="/">Cine Santa Fe</a>
+        <div class="collapse navbar-collapse justify-content-center">
+            <ul class="navbar-nav">
+                <li class="nav-item"><a class="nav-link" href="/">Inicio</a></li>
+                <li class="nav-item"><a class="nav-link" href="/templates/cartelera.html">Cartelera</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <div class="contenedor-sala">
+        <div class="pantalla">PANTALLA</div>
+        <div id="grid-asientos">
+        </div>
+    </div>
+
+    <script>
+        async function cargarAsientos() {
+            try {
+                const respuesta = await fetch('/api/asientos');
+                const matriz = await respuesta.json();
+
+                const contenedor = document.getElementById('grid-asientos');
+
+                matriz.forEach(fila => {
+                    const divFila = document.createElement('div');
+                    divFila.className = 'fila-asientos';
+
+                    fila.forEach(asiento => {
+                        const divAsiento = document.createElement('div');
+                        divAsiento.className = 'asiento ' + (asiento === null ? 'libre' : 'ocupado');
+                        divAsiento.textContent = asiento === null ? '' : asiento[0];
+                        divFila.appendChild(divAsiento);
+                    });
+
+                    contenedor.appendChild(divFila);
+                });
+            } catch (error) {
+                console.error("Error al cargar los asientos:", error);
+                document.getElementById('grid-asientos').innerHTML = "<p>No se pudo cargar la sala.</p>";
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', cargarAsientos);
+    </script>
+</body>
+</html>
