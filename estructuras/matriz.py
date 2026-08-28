@@ -35,6 +35,7 @@ class MatrizAsientos:
         return self._matriz[fila][columna]
 
     def a_estructura_json(self) -> List[List[Optional[str]]]:
+        """Devuelve la matriz completa, lista para enviar como JSON al frontend."""
         return self._matriz
 
     def _validar_posicion(self, fila: int, columna: int) -> None:
@@ -43,12 +44,3 @@ class MatrizAsientos:
                 f"Posición ({fila}, {columna}) fuera de rango para una sala "
                 f"de {self.filas}x{self.columnas}"
             )
-
-
-if __name__ == "__main__":
-    sala = MatrizAsientos(filas=5, columnas=8)
-    print("¿B4 libre?", sala.esta_libre(1, 3))
-    sala.reservar(1, 3, "Ana")
-    print("¿B4 libre ahora?", sala.esta_libre(1, 3))
-    print("Ocupado por:", sala.ocupado_por(1, 3))
-    print("Intento de reservar ya ocupado:", sala.reservar(1, 3, "Luis"))
