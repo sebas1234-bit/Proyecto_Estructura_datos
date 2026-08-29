@@ -7,7 +7,6 @@
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
     <link rel="stylesheet" href="../static/css/styles.css">
     <style>
-        /* Diseño UX/UI para la cuadrícula de películas */
         .contenedor-cartelera {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
@@ -29,11 +28,17 @@
             transform: translateY(-10px);
             box-shadow: 0 15px 30px rgba(0,0,0,0.2);
         }
-        .poster-img {
+
+        /* Póster genérico: solo CSS, sin depender de ninguna imagen externa */
+        .poster-generico {
             width: 100%;
             height: 400px;
-            object-fit: cover;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 5rem;
         }
+
         .info-pelicula {
             padding: 20px;
             text-align: center;
@@ -73,7 +78,6 @@
     </style>
 </head>
 <body>
-    <!-- Barra de navegación -->
     <nav class="navbar navbar-expand-lg">
         <a class="navbar-brand" href="/">Cine Santa Fe</a>
         <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav">
@@ -89,37 +93,56 @@
         </div>
     </nav>
 
-    <!-- Contenedor donde se inyectarán las películas mediante JS -->
-    <div class="contenedor-cartelera" id="grid-peliculas">
-        <!-- Las películas aparecerán aquí -->
-    </div>
+    <div class="contenedor-cartelera" id="grid-peliculas"></div>
 
     <script>
-        // Función para conectar el HTML con el Vector de Python
+        // Mapa de género -> ícono y degradado de color (todo generado en CSS,
+        // sin depender de ninguna imagen externa que se pueda caer o romper)
+        const ESTILOS_GENERO = {
+            "Ciencia Ficción": { icono: "🚀", degradado: "linear-gradient(135deg, #0f3460, #1a1a2e)" },
+            "Acción":          { icono: "💥", degradado: "linear-gradient(135deg, #7a1f1f, #1a1a2e)" },
+            "Animación":       { icono: "🎨", degradado: "linear-gradient(135deg, #2e5339, #1a1a2e)" },
+            "Comedia":         { icono: "😂", degradado: "linear-gradient(135deg, #7a5c1f, #1a1a2e)" },
+            "Drama":           { icono: "🎭", degradado: "linear-gradient(135deg, #3a1f5c, #1a1a2e)" },
+            "Terror":          { icono: "👻", degradado: "linear-gradient(135deg, #1f1f1f, #000000)" },
+            "Suspenso":        { icono: "🔍", degradado: "linear-gradient(135deg, #2f2f4f, #1a1a2e)" },
+        };
+        const ESTILO_POR_DEFECTO = { icono: "🎬", degradado: "linear-gradient(135deg, #1a1a2e, #16213e)" };
+
+        function crearPoster(pelicula) {
+            const estilo = ESTILOS_GENERO[pelicula.genero] || ESTILO_POR_DEFECTO;
+            const div = document.createElement('div');
+            div.className = 'poster-generico';
+            div.style.background = estilo.degradado;
+            div.textContent = estilo.icono;
+            return div;
+        }
+
         async function cargarCartelera() {
             try {
-                // AQUÍ ESTÁ LA LÍNEA QUE BUSCABAS: Ruta relativa hacia FastAPI
                 const respuesta = await fetch('/api/peliculas');
                 const peliculas = await respuesta.json();
-                
                 const contenedor = document.getElementById('grid-peliculas');
-                
-                // Recorremos el vector recibido y creamos las tarjetas HTML
+
                 peliculas.forEach(pelicula => {
                     const tarjeta = document.createElement('div');
                     tarjeta.className = 'tarjeta-pelicula';
-                    
-                    tarjeta.innerHTML = `
-                        <img src="${pelicula.imagen}" alt="Póster de ${pelicula.titulo}" class="poster-img">
-                        <div class="info-pelicula">
-                            <div>
-                                <h3>${pelicula.titulo}</h3>
-                                <p><strong>Género:</strong> ${pelicula.genero}</p>
-                                <p><strong>Duración:</strong> ${pelicula.duracion}</p>
-                            </div>
-                            <a href="/templates/login.html" class="btn-reservar">Reservar Asiento</a>
+
+                    const poster = crearPoster(pelicula);
+                    tarjeta.appendChild(poster);
+
+                    const info = document.createElement('div');
+                    info.className = 'info-pelicula';
+                    info.innerHTML = `
+                        <div>
+                            <h3>${pelicula.titulo}</h3>
+                            <p><strong>Género:</strong> ${pelicula.genero}</p>
+                            <p><strong>Duración:</strong> ${pelicula.duracion}</p>
                         </div>
+                        <a href="/templates/login.html" class="btn-reservar">Reservar Asiento</a>
                     `;
+                    tarjeta.appendChild(info);
+
                     contenedor.appendChild(tarjeta);
                 });
             } catch (error) {
@@ -128,7 +151,6 @@
             }
         }
 
-        // Ejecutar la función cuando la página cargue
         document.addEventListener('DOMContentLoaded', cargarCartelera);
     </script>
 
