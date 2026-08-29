@@ -40,9 +40,20 @@
         }
         .libre {
             background-color: #4caf50;
+            cursor: pointer;
+            transition: transform 0.15s;
+        }
+        .libre:hover {
+            transform: scale(1.1);
         }
         .ocupado {
             background-color: #e50914;
+            cursor: not-allowed;
+        }
+        #estado-conexion {
+            font-size: 0.85rem;
+            color: #666;
+            margin-top: 15px;
         }
     </style>
 </head>
@@ -59,26 +70,66 @@
 
     <div class="contenedor-sala">
         <div class="pantalla">PANTALLA</div>
-        <div id="grid-asientos">
-        </div>
+        <div id="grid-asientos"></div>
+        <p id="estado-conexion">Conectando en tiempo real...</p>
     </div>
 
     <script>
+        // Nombre temporal del usuario (más adelante esto vendrá del login real)
+        const usuarioActual = "Invitado-" + Math.floor(Math.random() * 1000);
+
+        function pintarAsiento(fila, columna, ocupadoPor) {
+            const celda = document.querySelector(
+                `[data-fila="${fila}"][data-columna="${columna}"]`
+            );
+            if (!celda) return;
+            celda.className = "asiento " + (ocupadoPor ? "ocupado" : "libre");
+            celda.textContent = ocupadoPor ? ocupadoPor[0] : "";
+            celda.title = ocupadoPor ? `Ocupado por ${ocupadoPor}` : "Disponible";
+        }
+
+        async function reservarAsiento(fila, columna) {
+            try {
+                const respuesta = await fetch('/api/asientos/reservar', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ fila, columna, usuario: usuarioActual }),
+                });
+                const resultado = await respuesta.json();
+                if (!resultado.exito) {
+                    alert("Ese asiento ya fue tomado por otra persona.");
+                }
+                // No pintamos aquí directamente: esperamos el mensaje del
+                // WebSocket, así se ve exactamente igual en todas las
+                // pantallas conectadas (incluida la propia).
+            } catch (error) {
+                console.error("Error al reservar:", error);
+            }
+        }
+
         async function cargarAsientos() {
             try {
                 const respuesta = await fetch('/api/asientos');
                 const matriz = await respuesta.json();
-
                 const contenedor = document.getElementById('grid-asientos');
 
-                matriz.forEach(fila => {
+                matriz.forEach((fila, indiceFila) => {
                     const divFila = document.createElement('div');
                     divFila.className = 'fila-asientos';
 
-                    fila.forEach(asiento => {
+                    fila.forEach((asiento, indiceColumna) => {
                         const divAsiento = document.createElement('div');
                         divAsiento.className = 'asiento ' + (asiento === null ? 'libre' : 'ocupado');
                         divAsiento.textContent = asiento === null ? '' : asiento[0];
+                        divAsiento.title = asiento === null ? 'Disponible' : `Ocupado por ${asiento}`;
+                        divAsiento.dataset.fila = indiceFila;
+                        divAsiento.dataset.columna = indiceColumna;
+
+                        divAsiento.addEventListener('click', () => {
+                            if (divAsiento.classList.contains('ocupado')) return;
+                            reservarAsiento(indiceFila, indiceColumna);
+                        });
+
                         divFila.appendChild(divAsiento);
                     });
 
@@ -90,7 +141,28 @@
             }
         }
 
-        document.addEventListener('DOMContentLoaded', cargarAsientos);
+        function conectarWebSocket() {
+            const protocolo = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+            const ws = new WebSocket(`${protocolo}//${window.location.host}/ws/asientos`);
+
+            ws.onopen = () => {
+                document.getElementById('estado-conexion').textContent = "Conectado en tiempo real ✔";
+            };
+
+            ws.onmessage = (evento) => {
+                const datos = JSON.parse(evento.data);
+                pintarAsiento(datos.fila, datos.columna, datos.ocupado_por);
+            };
+
+            ws.onclose = () => {
+                document.getElementById('estado-conexion').textContent = "Conexión perdida, recarga la página.";
+            };
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            cargarAsientos();
+            conectarWebSocket();
+        });
     </script>
 </body>
 </html>
