@@ -6,56 +6,191 @@
     <title>Cine Santa Fe - Inicio</title>
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
     <link rel="stylesheet" href="../static/css/styles.css">
+    <style>
+        /* Estilos base cinematográficos */
+        body {
+            background-color: #f4f4f9;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        /* Barra de navegación oscura y elegante */
+        .navbar {
+            background-color: #1a1a2e;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.3);
+        }
+        .navbar-brand {
+            font-weight: bold;
+            letter-spacing: 1px;
+            color: #ffffff !important;
+        }
+        .nav-link {
+            color: #e0e0e0 !important;
+            transition: color 0.3s ease;
+        }
+        .nav-link:hover, .nav-link.active {
+            color: #e50914 !important; /* Rojo estilo cine */
+        }
+
+        /* Sección Hero (Banner principal) */
+        .hero {
+            background: linear-gradient(rgba(26, 26, 46, 0.85), rgba(26, 26, 46, 0.95)), 
+                        url('https://images.unsplash.com/photo-1489599849927-2ee91cede3ba?ixlib=rb-4.0.3&auto=format&fit=crop&w=1920&q=80') center/cover no-repeat;
+            color: white;
+            padding: 120px 20px;
+            text-align: center;
+        }
+        .hero-contenido h1 {
+            font-size: 3.5rem;
+            font-weight: 800;
+            margin-bottom: 25px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+        }
+        .hero-contenido p {
+            font-size: 1.2rem;
+            max-width: 700px;
+            margin: 0 auto 15px auto;
+            line-height: 1.6;
+            color: #d1d1d1;
+        }
+        .btn-hero {
+            display: inline-block;
+            background-color: #e50914;
+            color: white;
+            padding: 15px 35px;
+            border-radius: 8px;
+            font-size: 1.1rem;
+            font-weight: bold;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            text-decoration: none;
+            margin-top: 30px;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(229, 9, 20, 0.4);
+        }
+        .btn-hero:hover {
+            background-color: #b20710;
+            color: white;
+            text-decoration: none;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(229, 9, 20, 0.6);
+        }
+
+        /* Franja de características (Tarjetas flotantes) */
+        .container-main {
+            max-width: 1200px;
+            margin: -50px auto 50px auto; /* Sube las tarjetas sobre el hero */
+            padding: 0 20px;
+            position: relative;
+            z-index: 10;
+        }
+        .franja-destacados {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 25px;
+        }
+        .destacado {
+            background: white;
+            padding: 30px;
+            border-radius: 12px;
+            text-align: center;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            transition: transform 0.3s ease;
+            border-bottom: 4px solid #e50914;
+        }
+        .destacado:hover {
+            transform: translateY(-10px);
+        }
+        .destacado h3 {
+            color: #1a1a2e;
+            font-size: 1.4rem;
+            font-weight: bold;
+            margin-bottom: 15px;
+        }
+        .destacado p {
+            color: #555;
+            font-size: 1rem;
+            margin: 0;
+        }
+    </style>
 </head>
 <body>
+
+    <!-- Barra de navegación -->
     <nav class="navbar navbar-expand-lg">
-        <a class="navbar-brand" href="inicio.html">Cine Santa Fe</a>
-        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
-            <span class="navbar-toggler-icon"></span>
+        <a class="navbar-brand" href="/">Cine Santa Fe</a>
+        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav">
+            <span class="navbar-toggler-icon" style="background-color: #fff; border-radius: 3px;"></span>
         </button>
         <div class="collapse navbar-collapse justify-content-center" id="navbarNav">
             <ul class="navbar-nav">
-                <li class="nav-item"><a class="nav-link" href="inicio.html">Inicio</a></li>
-                <li class="nav-item"><a class="nav-link" href="cartelera.html">Cartelera</a></li>
-                <li class="nav-item"><a class="nav-link" href="nosotros.html">Nosotros</a></li>
-                <li class="nav-item"><a class="nav-link" href="login.html">Iniciar Sesión</a></li>
+                <li class="nav-item"><a class="nav-link active" href="/">Inicio</a></li>
+                <li class="nav-item"><a class="nav-link" href="/templates/cartelera.html">Cartelera</a></li>
+                <li class="nav-item"><a class="nav-link" href="/templates/nosotros.html">Nosotros</a></li>
+                
+                <!-- Botones dinámicos de sesión -->
+                <li class="nav-item" id="nav-login">
+                    <a class="nav-link" href="/templates/login.html" style="font-weight: bold;">Iniciar Sesión</a>
+                </li>
+                <li class="nav-item" id="nav-logout" style="display: none;">
+                    <a class="nav-link" href="#" onclick="cerrarSesion()" style="color: #e50914 !important; font-weight: bold;">Cerrar Sesión</a>
+                </li>
             </ul>
         </div>
     </nav>
 
+    <!-- Sección Principal (Hero) -->
     <section class="hero">
         <div class="hero-contenido">
             <h1>Bienvenido a Cine Santa Fe</h1>
             <p>
-                Cine Santa Fe es una plataforma que moderniza la administración del cine,
+                Una plataforma que moderniza la administración del cine,
                 centralizando la gestión de películas, salas, funciones, clientes y entradas.
             </p>
             <p>
                 Consulta la cartelera, elige tus asientos en tiempo real y compra tus entradas
                 de forma sencilla, rápida y organizada.
             </p>
-            <a href="cartelera.html" class="btn-hero">Ver cartelera</a>
+            <a href="/templates/cartelera.html" class="btn-hero">Ver cartelera</a>
         </div>
     </section>
 
+    <!-- Franja de características destacadas -->
     <div class="container-main">
         <div class="franja-destacados">
             <div class="destacado">
                 <h3>🎬 Cartelera actualizada</h3>
-                <p>Las últimas películas disponibles, siempre al día.</p>
+                <p>Las últimas películas disponibles en nuestro catálogo, siempre al día.</p>
             </div>
             <div class="destacado">
                 <h3>💺 Asientos en tiempo real</h3>
-                <p>Elige tu silla y ve al instante si alguien más la está mirando.</p>
+                <p>Elige tu silla y ve al instante la disponibilidad exacta en cada función.</p>
             </div>
             <div class="destacado">
                 <h3>🎟️ Compra sin filas</h3>
-                <p>Reserva desde cualquier lugar, sin hacer fila en taquilla.</p>
+                <p>Reserva desde cualquier lugar de forma sencilla, sin hacer fila en taquilla.</p>
             </div>
         </div>
     </div>
 
+    <!-- Script de sesión (Cargar y Cerrar) -->
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const usuario = localStorage.getItem('usuarioActivo');
+            if (usuario) {
+                // Si hay sesión activa, oculta Login y muestra Logout
+                document.getElementById('nav-login').style.display = 'none';
+                document.getElementById('nav-logout').style.display = 'block';
+            }
+        });
+
+        function cerrarSesion() {
+            localStorage.removeItem('usuarioActivo');
+            window.location.reload(); 
+        }
+    </script>
+
     <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.1/dist/umd/popper.min.js"></script>
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
 </body>
 </html>

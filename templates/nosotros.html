@@ -6,44 +6,180 @@
     <title>Cine Santa Fe - Nosotros</title>
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
     <link rel="stylesheet" href="../static/css/styles.css">
+    <style>
+        body {
+            background-color: #f4f4f9;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        /* Barra de navegación */
+        .navbar {
+            background-color: #1a1a2e;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.3);
+        }
+        .navbar-brand { font-weight: bold; letter-spacing: 1px; color: #ffffff !important; }
+        .nav-link { color: #e0e0e0 !important; transition: color 0.3s ease; }
+        .nav-link:hover, .nav-link.active { color: #e50914 !important; }
+
+        /* Banner Principal de Nosotros */
+        .hero-nosotros {
+            background: linear-gradient(rgba(26, 26, 46, 0.9), rgba(26, 26, 46, 0.95)), 
+                        url('https://images.unsplash.com/photo-1517604931442-7e0c8ed2963c?ixlib=rb-4.0.3&auto=format&fit=crop&w=1920&q=80') center/cover no-repeat;
+            color: white;
+            padding: 100px 20px;
+            text-align: center;
+            margin-bottom: -40px;
+        }
+        .hero-nosotros h1 {
+            font-size: 3rem;
+            font-weight: 800;
+            margin-bottom: 20px;
+        }
+        .hero-nosotros p {
+            font-size: 1.1rem;
+            max-width: 800px;
+            margin: 0 auto;
+            line-height: 1.6;
+            color: #d1d1d1;
+        }
+
+        /* Tarjetas del Equipo */
+        .container-main {
+            max-width: 1200px;
+            margin: 0 auto 50px auto;
+            padding: 0 20px;
+            position: relative;
+            z-index: 10;
+        }
+        .grid-equipo {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 30px;
+            margin-top: 40px;
+        }
+        .miembro {
+            background: white;
+            padding: 40px 20px;
+            border-radius: 12px;
+            text-align: center;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            border-top: 5px solid #e50914;
+        }
+        .miembro:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 15px 40px rgba(0,0,0,0.2);
+        }
+        .avatar {
+            width: 80px;
+            height: 80px;
+            background-color: #1a1a2e;
+            color: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2rem;
+            font-weight: bold;
+            margin: 0 auto 20px auto;
+        }
+        .miembro h4 {
+            color: #1a1a2e;
+            font-size: 1.4rem;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+        .miembro p.rol {
+            color: #e50914;
+            font-weight: bold;
+            font-size: 0.9rem;
+            margin-bottom: 15px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        .miembro p.desc {
+            color: #555;
+            font-size: 0.95rem;
+            line-height: 1.5;
+        }
+    </style>
 </head>
 <body>
+
+    <!-- Barra de navegación -->
     <nav class="navbar navbar-expand-lg">
-        <a class="navbar-brand" href="inicio.html">Cine Santa Fe</a>
-        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
-            <span class="navbar-toggler-icon"></span>
+        <a class="navbar-brand" href="/">Cine Santa Fe</a>
+        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav">
+            <span class="navbar-toggler-icon" style="background-color: #fff; border-radius: 3px;"></span>
         </button>
         <div class="collapse navbar-collapse justify-content-center" id="navbarNav">
             <ul class="navbar-nav">
-                <li class="nav-item"><a class="nav-link" href="inicio.html">Inicio</a></li>
-                <li class="nav-item"><a class="nav-link" href="cartelera.html">Cartelera</a></li>
-                <li class="nav-item"><a class="nav-link" href="nosotros.html">Nosotros</a></li>
-                <li class="nav-item"><a class="nav-link" href="login.html">Iniciar Sesión</a></li>
+                <li class="nav-item"><a class="nav-link" href="/">Inicio</a></li>
+                <li class="nav-item"><a class="nav-link" href="/templates/cartelera.html">Cartelera</a></li>
+                <li class="nav-item"><a class="nav-link active" href="/templates/nosotros.html" style="color: #e50914 !important; font-weight: bold;">Nosotros</a></li>
+                
+                <li class="nav-item" id="nav-login">
+                    <a class="nav-link" href="/templates/login.html" style="font-weight: bold;">Iniciar Sesión</a>
+                </li>
+                <li class="nav-item" id="nav-logout" style="display: none;">
+                    <a class="nav-link" href="#" onclick="cerrarSesion()" style="color: #e50914 !important; font-weight: bold;">Cerrar Sesión</a>
+                </li>
             </ul>
         </div>
     </nav>
 
+    <!-- Banner Principal -->
+    <div class="hero-nosotros">
+        <h1>Conoce al Equipo</h1>
+        <p>Durante años, el cine de Santa Fe ha sido un punto de encuentro para el pueblo, pero su crecimiento exigía modernizarse. Somos el equipo encargado de centralizar la gestión de películas, salas y entradas, construyendo un sistema dinámico y eficiente[span_2](start_span)[span_2](end_span).</p>
+    </div>
+
+    <!-- Sección del Equipo -->
     <div class="container-main">
-        <h2>Nuestro Equipo</h2>
-        <p>Cine Santa Fe es desarrollado por un equipo enfocado en construir una experiencia más sencilla y organizada mediante estructuras de datos[span_5](start_span)[span_5](end_span).</p>
-        
         <div class="grid-equipo">
+            
             <div class="miembro">
+                <div class="avatar">JQ</div>
                 <h4>Juan José Quinchia</h4>
-                <p>Desarrollador</p>
+                <p class="rol">Desarrollador</p>
+                <p class="desc">Encargado de la estructura del catálogo mediante Vectores y Listas enlazadas, y responsable del algoritmo de ordenamiento Selection Sort[span_3](start_span)[span_3](end_span)[span_4](start_span)[span_4](end_span).</p>
             </div>
+            
             <div class="miembro">
+                <div class="avatar">NM</div>
                 <h4>Nicolle Mazo</h4>
-                <p>Desarrolladora</p>
+                <p class="rol">Desarrolladora</p>
+                <p class="desc">Responsable de optimizar el flujo de usuarios utilizando Colas (FIFO) para la sala de espera y Árboles Binarios de Búsqueda para el sistema de consultas rápidas[span_5](start_span)[span_5](end_span)[span_6](start_span)[span_6](end_span).</p>
             </div>
+            
             <div class="miembro">
+                <div class="avatar">JH</div>
                 <h4>Juan Sebastian Hernandez</h4>
-                <p>Desarrollador</p>
+                <p class="rol">Desarrollador</p>
+                <p class="desc">Diseñador de la representación espacial mediante Matrices para los asientos de las salas, y gestor del historial de operaciones a través de Pilas (LIFO)[span_7](start_span)[span_7](end_span)[span_8](start_span)[span_8](end_span).</p>
             </div>
+
         </div>
     </div>
 
+    <!-- Script de sesión -->
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const usuario = localStorage.getItem('usuarioActivo');
+            if (usuario) {
+                document.getElementById('nav-login').style.display = 'none';
+                document.getElementById('nav-logout').style.display = 'block';
+            }
+        });
+
+        function cerrarSesion() {
+            localStorage.removeItem('usuarioActivo');
+            window.location.reload(); 
+        }
+    </script>
+
     <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.1/dist/umd/popper.min.js"></script>
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
 </body>
 </html>
