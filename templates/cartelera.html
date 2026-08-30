@@ -7,88 +7,30 @@
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
     <link rel="stylesheet" href="../static/css/styles.css">
     <style>
-        .contenedor-cartelera {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-            gap: 30px;
-            padding: 40px 20px;
-            max-width: 1200px;
-            margin: 0 auto;
-        }
-        .tarjeta-pelicula {
-            background-color: white;
-            border-radius: 12px;
-            overflow: hidden;
-            box-shadow: 0 10px 20px rgba(0,0,0,0.1);
-            transition: transform 0.3s ease, box-shadow 0.3s ease;
-            display: flex;
-            flex-direction: column;
-        }
-        .tarjeta-pelicula:hover {
-            transform: translateY(-10px);
-            box-shadow: 0 15px 30px rgba(0,0,0,0.2);
-        }
-
-        /* Póster genérico: solo CSS, sin depender de ninguna imagen externa */
-        .poster-generico {
-            width: 100%;
-            height: 400px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 5rem;
-        }
-
-        .info-pelicula {
-            padding: 20px;
-            text-align: center;
-            flex-grow: 1;
-            display: flex;
-            flex-direction: column;
-            justify-content: space-between;
-        }
-        .info-pelicula h3 {
-            font-size: 1.25rem;
-            color: #1a1a2e;
-            font-weight: bold;
-            margin-bottom: 10px;
-        }
-        .info-pelicula p {
-            color: #666;
-            margin-bottom: 5px;
-            font-size: 0.9rem;
-        }
-        .btn-reservar {
-            background-color: #e50914;
-            color: white;
-            border: none;
-            padding: 10px 20px;
-            border-radius: 6px;
-            font-weight: bold;
-            text-decoration: none;
-            display: inline-block;
-            margin-top: 15px;
-            transition: background-color 0.3s;
-        }
-        .btn-reservar:hover {
-            background-color: #b20710;
-            color: white;
-            text-decoration: none;
-        }
+        .contenedor-cartelera { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 30px; padding: 40px 20px; max-width: 1200px; margin: 0 auto; }
+        .tarjeta-pelicula { background-color: white; border-radius: 12px; overflow: hidden; box-shadow: 0 10px 20px rgba(0,0,0,0.1); transition: transform 0.3s ease; display: flex; flex-direction: column; }
+        .tarjeta-pelicula:hover { transform: translateY(-10px); }
+        .poster-generico { width: 100%; height: 400px; display: flex; align-items: center; justify-content: center; font-size: 5rem; }
+        .info-pelicula { padding: 20px; text-align: center; flex-grow: 1; display: flex; flex-direction: column; justify-content: space-between; }
+        .info-pelicula h3 { font-size: 1.25rem; color: #1a1a2e; font-weight: bold; margin-bottom: 10px; }
+        .info-pelicula p { color: #666; margin-bottom: 5px; font-size: 0.9rem; }
+        .btn-reservar { background-color: #e50914; color: white; border: none; padding: 10px 20px; border-radius: 6px; font-weight: bold; text-decoration: none; display: inline-block; margin-top: 15px; transition: background-color 0.3s; }
+        .btn-reservar:hover { background-color: #b20710; color: white; text-decoration: none; }
     </style>
 </head>
 <body>
     <nav class="navbar navbar-expand-lg">
         <a class="navbar-brand" href="/">Cine Santa Fe</a>
         <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav">
-            <span class="navbar-toggler-icon" style="background-color: white; border-radius: 3px;"></span>
+            <span class="navbar-toggler-icon"></span>
         </button>
         <div class="collapse navbar-collapse justify-content-center" id="navbarNav">
             <ul class="navbar-nav">
                 <li class="nav-item"><a class="nav-link" href="/">Inicio</a></li>
                 <li class="nav-item"><a class="nav-link active" href="/templates/cartelera.html" style="color: #e50914 !important; font-weight: bold;">Cartelera</a></li>
                 <li class="nav-item"><a class="nav-link" href="/templates/nosotros.html">Nosotros</a></li>
-                <li class="nav-item"><a class="nav-link" href="/templates/login.html">Iniciar Sesión</a></li>
+                <li class="nav-item" id="nav-login"><a class="nav-link" href="/templates/login.html">Iniciar Sesión</a></li>
+                <li class="nav-item" id="nav-logout" style="display: none;"><a class="nav-link" href="#" onclick="cerrarSesion()" style="color: #e50914;">Cerrar Sesión</a></li>
             </ul>
         </div>
     </nav>
@@ -96,16 +38,28 @@
     <div class="contenedor-cartelera" id="grid-peliculas"></div>
 
     <script>
-        // Mapa de género -> ícono y degradado de color (todo generado en CSS,
-        // sin depender de ninguna imagen externa que se pueda caer o romper)
+        document.addEventListener('DOMContentLoaded', () => {
+            const usuario = localStorage.getItem('usuarioActivo');
+            if (usuario) {
+                document.getElementById('nav-login').style.display = 'none';
+                document.getElementById('nav-logout').style.display = 'block';
+            }
+            cargarCartelera();
+        });
+
+        function cerrarSesion() {
+            localStorage.removeItem('usuarioActivo');
+            window.location.href = "/"; 
+        }
+
         const ESTILOS_GENERO = {
             "Ciencia Ficción": { icono: "🚀", degradado: "linear-gradient(135deg, #0f3460, #1a1a2e)" },
-            "Acción":          { icono: "💥", degradado: "linear-gradient(135deg, #7a1f1f, #1a1a2e)" },
-            "Animación":       { icono: "🎨", degradado: "linear-gradient(135deg, #2e5339, #1a1a2e)" },
-            "Comedia":         { icono: "😂", degradado: "linear-gradient(135deg, #7a5c1f, #1a1a2e)" },
-            "Drama":           { icono: "🎭", degradado: "linear-gradient(135deg, #3a1f5c, #1a1a2e)" },
-            "Terror":          { icono: "👻", degradado: "linear-gradient(135deg, #1f1f1f, #000000)" },
-            "Suspenso":        { icono: "🔍", degradado: "linear-gradient(135deg, #2f2f4f, #1a1a2e)" },
+            "Acción": { icono: "💥", degradado: "linear-gradient(135deg, #7a1f1f, #1a1a2e)" },
+            "Animación": { icono: "🎨", degradado: "linear-gradient(135deg, #2e5339, #1a1a2e)" },
+            "Comedia": { icono: "😂", degradado: "linear-gradient(135deg, #7a5c1f, #1a1a2e)" },
+            "Drama": { icono: "🎭", degradado: "linear-gradient(135deg, #3a1f5c, #1a1a2e)" },
+            "Terror": { icono: "👻", degradado: "linear-gradient(135deg, #1f1f1f, #000000)" },
+            "Suspenso": { icono: "🔍", degradado: "linear-gradient(135deg, #2f2f4f, #1a1a2e)" },
         };
         const ESTILO_POR_DEFECTO = { icono: "🎬", degradado: "linear-gradient(135deg, #1a1a2e, #16213e)" };
 
@@ -123,13 +77,13 @@
                 const respuesta = await fetch('/api/peliculas');
                 const peliculas = await respuesta.json();
                 const contenedor = document.getElementById('grid-peliculas');
+                const usuarioLogeado = localStorage.getItem('usuarioActivo');
+                const rutaDestino = usuarioLogeado ? "/templates/asientos.html" : "/templates/login.html";
 
                 peliculas.forEach(pelicula => {
                     const tarjeta = document.createElement('div');
                     tarjeta.className = 'tarjeta-pelicula';
-
-                    const poster = crearPoster(pelicula);
-                    tarjeta.appendChild(poster);
+                    tarjeta.appendChild(crearPoster(pelicula));
 
                     const info = document.createElement('div');
                     info.className = 'info-pelicula';
@@ -139,23 +93,15 @@
                             <p><strong>Género:</strong> ${pelicula.genero}</p>
                             <p><strong>Duración:</strong> ${pelicula.duracion}</p>
                         </div>
-                        <a href="/templates/login.html" class="btn-reservar">Reservar Asiento</a>
+                        <a href="${rutaDestino}" class="btn-reservar">Reservar Asiento</a>
                     `;
                     tarjeta.appendChild(info);
-
                     contenedor.appendChild(tarjeta);
                 });
             } catch (error) {
-                console.error("Error al cargar la cartelera:", error);
-                document.getElementById('grid-peliculas').innerHTML = "<p style='text-align:center; grid-column: 1/-1;'>No se pudo cargar la cartelera en este momento.</p>";
+                document.getElementById('grid-peliculas').innerHTML = "<p style='text-align:center; grid-column: 1/-1;'>Error al cargar la cartelera.</p>";
             }
         }
-
-        document.addEventListener('DOMContentLoaded', cargarCartelera);
     </script>
-
-    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.1/dist/umd/popper.min.js"></script>
-    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
 </body>
 </html>

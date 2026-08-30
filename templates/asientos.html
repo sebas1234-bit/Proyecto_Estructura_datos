@@ -64,27 +64,30 @@
             <ul class="navbar-nav">
                 <li class="nav-item"><a class="nav-link" href="/">Inicio</a></li>
                 <li class="nav-item"><a class="nav-link" href="/templates/cartelera.html">Cartelera</a></li>
+                <li class="nav-item"><a class="nav-link" href="/templates/nosotros.html">Nosotros</a></li>
+                <!-- Botones de sesión -->
+                <li class="nav-item" id="nav-login" style="display: none;"><a class="nav-link" href="/templates/login.html">Iniciar Sesión</a></li>
+                <li class="nav-item" id="nav-logout"><a class="nav-link" href="#" onclick="cerrarSesion()" style="color: #e50914;">Cerrar Sesión</a></li>
             </ul>
         </div>
     </nav>
 
     <div class="contenedor-sala">
-        <div class="pantalla">PANTALLA</div>
+        <h4>Reserva a nombre de: <span id="nombre-usuario" style="color: #e50914;"></span></h4>
+        <div class="pantalla mt-4">PANTALLA</div>
         <div id="grid-asientos"></div>
         <p id="estado-conexion">Conectando en tiempo real...</p>
     </div>
 
     <script>
-        // Nombre temporal del usuario (más adelante esto vendrá del login real)
-        const usuarioActual = "Invitado-" + Math.floor(Math.random() * 1000);
+        // Obtenemos el usuario real desde el Login en lugar de un Invitado al azar
+        let usuarioActual = localStorage.getItem('usuarioActivo');
 
         function pintarAsiento(fila, columna, ocupadoPor) {
-            const celda = document.querySelector(
-                `[data-fila="${fila}"][data-columna="${columna}"]`
-            );
+            const celda = document.querySelector(`[data-fila="${fila}"][data-columna="${columna}"]`);
             if (!celda) return;
             celda.className = "asiento " + (ocupadoPor ? "ocupado" : "libre");
-            celda.textContent = ocupadoPor ? ocupadoPor[0] : "";
+            celda.textContent = ocupadoPor ? ocupadoPor[0].toUpperCase() : "";
             celda.title = ocupadoPor ? `Ocupado por ${ocupadoPor}` : "Disponible";
         }
 
@@ -99,9 +102,6 @@
                 if (!resultado.exito) {
                     alert("Ese asiento ya fue tomado por otra persona.");
                 }
-                // No pintamos aquí directamente: esperamos el mensaje del
-                // WebSocket, así se ve exactamente igual en todas las
-                // pantallas conectadas (incluida la propia).
             } catch (error) {
                 console.error("Error al reservar:", error);
             }
@@ -120,7 +120,7 @@
                     fila.forEach((asiento, indiceColumna) => {
                         const divAsiento = document.createElement('div');
                         divAsiento.className = 'asiento ' + (asiento === null ? 'libre' : 'ocupado');
-                        divAsiento.textContent = asiento === null ? '' : asiento[0];
+                        divAsiento.textContent = asiento === null ? '' : asiento[0].toUpperCase();
                         divAsiento.title = asiento === null ? 'Disponible' : `Ocupado por ${asiento}`;
                         divAsiento.dataset.fila = indiceFila;
                         divAsiento.dataset.columna = indiceColumna;
@@ -132,7 +132,6 @@
 
                         divFila.appendChild(divAsiento);
                     });
-
                     contenedor.appendChild(divFila);
                 });
             } catch (error) {
@@ -145,21 +144,31 @@
             const protocolo = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
             const ws = new WebSocket(`${protocolo}//${window.location.host}/ws/asientos`);
 
-            ws.onopen = () => {
-                document.getElementById('estado-conexion').textContent = "Conectado en tiempo real ✔";
-            };
-
+            ws.onopen = () => { document.getElementById('estado-conexion').textContent = "Conectado en tiempo real ✔"; };
+            
             ws.onmessage = (evento) => {
                 const datos = JSON.parse(evento.data);
                 pintarAsiento(datos.fila, datos.columna, datos.ocupado_por);
             };
+            
+            ws.onclose = () => { document.getElementById('estado-conexion').textContent = "Conexión perdida, recarga la página."; };
+        }
 
-            ws.onclose = () => {
-                document.getElementById('estado-conexion').textContent = "Conexión perdida, recarga la página.";
-            };
+        function cerrarSesion() {
+            localStorage.removeItem('usuarioActivo');
+            window.location.href = "/";
         }
 
         document.addEventListener('DOMContentLoaded', () => {
+            // Protección de ruta: Si no hay usuario en localStorage, lo devuelve al Login
+            if (!usuarioActual) {
+                window.location.href = "/templates/login.html";
+                return;
+            }
+            
+            // Muestra el nombre en pantalla
+            document.getElementById('nombre-usuario').innerText = usuarioActual;
+            
             cargarAsientos();
             conectarWebSocket();
         });
