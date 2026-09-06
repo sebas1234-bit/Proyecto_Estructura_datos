@@ -14,11 +14,19 @@
         .info-pelicula { padding: 20px; text-align: center; flex-grow: 1; display: flex; flex-direction: column; justify-content: space-between; }
         .info-pelicula h3 { font-size: 1.25rem; color: #1a1a2e; font-weight: bold; margin-bottom: 10px; }
         .info-pelicula p { color: #666; margin-bottom: 5px; font-size: 0.9rem; }
-        .btn-reservar { background-color: #e50914; color: white; border: none; padding: 10px 20px; border-radius: 6px; font-weight: bold; text-decoration: none; display: inline-block; margin-top: 15px; transition: background-color 0.3s; }
+        
+        /* Botones originales */
+        .btn-reservar { background-color: #e50914; color: white; border: none; padding: 10px 20px; border-radius: 6px; font-weight: bold; text-decoration: none; display: block; margin-top: 15px; width: 100%; transition: background-color 0.3s; }
         .btn-reservar:hover { background-color: #b20710; color: white; text-decoration: none; }
+        
+        /* Botón extra para eliminar y caja de agregar */
+        .btn-eliminar { background-color: #333; color: white; border: none; padding: 8px; border-radius: 4px; font-size: 0.9rem; margin-top: 10px; width: 100%; display: block; transition: background-color 0.3s; }
+        .btn-eliminar:hover { background-color: #111; color: white; }
+        .caja-agregar { max-width: 1200px; margin: 20px auto 60px auto; padding: 30px; background: white; border-radius: 12px; border-top: 4px solid #e50914; display: none; }
     </style>
 </head>
 <body>
+
     <nav class="navbar navbar-expand-lg">
         <a class="navbar-brand" href="/">Cine Santa Fe</a>
         <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav">
@@ -35,21 +43,35 @@
         </div>
     </nav>
 
+    <!-- Contenedor del Catálogo -->
     <div class="contenedor-cartelera" id="grid-peliculas"></div>
 
+    <!-- Formulario Agregar Películas (Solo visible con sesión) -->
+    <div class="caja-agregar" id="caja-agregar">
+        <h3 style="color: #1a1a2e; font-weight: bold; margin-bottom: 20px;">🎬 Añadir Nueva Película</h3>
+        <div class="form-row">
+            <div class="col-md-4 mb-3"><input type="text" id="nueva-titulo" class="form-control" placeholder="Título" required></div>
+            <div class="col-md-3 mb-3"><input type="text" id="nueva-genero" class="form-control" placeholder="Género" required></div>
+            <div class="col-md-3 mb-3"><input type="text" id="nueva-duracion" class="form-control" placeholder="Duración (ej. 120 min)" required></div>
+            <div class="col-md-2 mb-3"><button onclick="agregarPelicula()" class="btn-reservar" style="margin-top: 0;">Añadir</button></div>
+        </div>
+    </div>
+
     <script>
+        const usuarioLogeado = localStorage.getItem('usuarioActivo');
+
         document.addEventListener('DOMContentLoaded', () => {
-            const usuario = localStorage.getItem('usuarioActivo');
-            if (usuario) {
+            if (usuarioLogeado) {
                 document.getElementById('nav-login').style.display = 'none';
                 document.getElementById('nav-logout').style.display = 'block';
+                document.getElementById('caja-agregar').style.display = 'block'; // Muestra el formulario
             }
             cargarCartelera();
         });
 
         function cerrarSesion() {
             localStorage.removeItem('usuarioActivo');
-            window.location.href = "/"; 
+            window.location.reload(); 
         }
 
         const ESTILOS_GENERO = {
@@ -77,7 +99,8 @@
                 const respuesta = await fetch('/api/peliculas');
                 const peliculas = await respuesta.json();
                 const contenedor = document.getElementById('grid-peliculas');
-                const usuarioLogeado = localStorage.getItem('usuarioActivo');
+                contenedor.innerHTML = '';
+                
                 const rutaDestino = usuarioLogeado ? "/templates/asientos.html" : "/templates/login.html";
 
                 peliculas.forEach(pelicula => {
@@ -87,13 +110,22 @@
 
                     const info = document.createElement('div');
                     info.className = 'info-pelicula';
+                    
+                    // Inyectamos el botón de borrar solo si hay sesión
+                    const botonBorrar = usuarioLogeado 
+                        ? `<button class="btn-eliminar" onclick="borrarPelicula('${pelicula.titulo}')">Eliminar</button>` 
+                        : '';
+
                     info.innerHTML = `
                         <div>
                             <h3>${pelicula.titulo}</h3>
                             <p><strong>Género:</strong> ${pelicula.genero}</p>
                             <p><strong>Duración:</strong> ${pelicula.duracion}</p>
                         </div>
-                        <a href="${rutaDestino}" class="btn-reservar">Reservar Asiento</a>
+                        <div>
+                            <a href="${rutaDestino}" class="btn-reservar">Reservar Asiento</a>
+                            ${botonBorrar}
+                        </div>
                     `;
                     tarjeta.appendChild(info);
                     contenedor.appendChild(tarjeta);
@@ -101,6 +133,30 @@
             } catch (error) {
                 document.getElementById('grid-peliculas').innerHTML = "<p style='text-align:center; grid-column: 1/-1;'>Error al cargar la cartelera.</p>";
             }
+        }
+
+        async function agregarPelicula() {
+            const titulo = document.getElementById('nueva-titulo').value;
+            const genero = document.getElementById('nueva-genero').value || "Acción";
+            const duracion = document.getElementById('nueva-duracion').value || "120 min";
+
+            if(!titulo) return alert("Por favor, llena el título.");
+
+            await fetch('/api/peliculas', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ titulo, genero, duracion })
+            });
+            
+            document.getElementById('nueva-titulo').value = '';
+            document.getElementById('nueva-genero').value = '';
+            document.getElementById('nueva-duracion').value = '';
+            cargarCartelera();
+        }
+
+        async function borrarPelicula(titulo) {
+            await fetch(`/api/peliculas/${titulo}`, { method: 'DELETE' });
+            cargarCartelera();
         }
     </script>
 </body>
