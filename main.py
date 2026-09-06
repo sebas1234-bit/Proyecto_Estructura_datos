@@ -45,6 +45,28 @@ async def login_usuario(usuario: Usuario):
         return {"mensaje": "¡Bienvenido a Cine Santa Fe!", "exito": True}
     return {"mensaje": "Correo o contraseña incorrectos.", "exito": False}
 
+# --- MODELO PARA EL CRUD DEL VECTOR ---
+class NuevaPelicula(BaseModel):
+    titulo: str
+    genero: str
+    duracion: str
+
+# --- RUTAS DEL CATÁLOGO (VECTOR) ---
+@app.get("/api/peliculas")
+def obtener_cartelera():
+    return catalogo_vector.obtener_todas()
+
+@app.post("/api/peliculas")
+def crear_pelicula(pelicula: NuevaPelicula):
+    nueva = {"titulo": pelicula.titulo, "genero": pelicula.genero, "duracion": pelicula.duracion}
+    catalogo_vector.agregar(nueva)
+    return {"mensaje": "Película agregada", "exito": True}
+
+@app.delete("/api/peliculas/{titulo}")
+def borrar_pelicula(titulo: str):
+    exito = catalogo_vector.eliminar(titulo)
+    return {"exito": exito}
+
 # --- GESTIÓN DE ASIENTOS Y WEBSOCKETS ---
 class ReservaAsiento(BaseModel):
     fila: int
@@ -68,10 +90,6 @@ class GestorConexiones:
             await conexion.send_json(mensaje)
 
 gestor = GestorConexiones()
-
-@app.get("/api/peliculas")
-def obtener_cartelera():
-    return catalogo_vector.obtener_todas()
 
 @app.get("/api/asientos")
 def obtener_asientos():
