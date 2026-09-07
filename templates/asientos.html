@@ -66,6 +66,9 @@
                 <li class="nav-item"><a class="nav-link" href="/templates/cartelera.html">Cartelera</a></li>
                 <li class="nav-item"><a class="nav-link" href="/templates/nosotros.html">Nosotros</a></li>
                 <!-- Botones de sesión -->
+                 <li class="nav-item" id="nav-saludo" style="display: none;">
+                    <span class="nav-link" style="color: #4caf50; font-weight: bold;">👋 <span id="nombre-navbar"></span></span>
+                </li>
                 <li class="nav-item" id="nav-login" style="display: none;"><a class="nav-link" href="/templates/login.html">Iniciar Sesión</a></li>
                 <li class="nav-item" id="nav-logout"><a class="nav-link" href="#" onclick="cerrarSesion()" style="color: #e50914;">Cerrar Sesión</a></li>
             </ul>
@@ -81,14 +84,15 @@
 
     <script>
         // Obtenemos el usuario real desde el Login en lugar de un Invitado al azar
-        let usuarioActual = localStorage.getItem('usuarioActivo');
-
+        let usuarioActual = localStorage.getItem('nombreActivo') || localStorage.getItem('usuarioActivo');
+        
         function pintarAsiento(fila, columna, ocupadoPor) {
             const celda = document.querySelector(`[data-fila="${fila}"][data-columna="${columna}"]`);
             if (!celda) return;
             celda.className = "asiento " + (ocupadoPor ? "ocupado" : "libre");
             celda.textContent = ocupadoPor ? ocupadoPor[0].toUpperCase() : "";
             celda.title = ocupadoPor ? `Ocupado por ${ocupadoPor}` : "Disponible";
+            
         }
 
         async function reservarAsiento(fila, columna) {
@@ -156,6 +160,7 @@
 
         function cerrarSesion() {
             localStorage.removeItem('usuarioActivo');
+            localStorage.removeItem('nombreActivo');
             window.location.href = "/";
         }
 
@@ -168,6 +173,8 @@
             
             // Muestra el nombre en pantalla
             document.getElementById('nombre-usuario').innerText = usuarioActual;
+            document.getElementById('nav-saludo').style.display = 'block';
+            document.getElementById('nombre-navbar').textContent = usuarioActual;
             
             cargarAsientos();
             conectarWebSocket();

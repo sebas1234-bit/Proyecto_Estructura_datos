@@ -118,6 +118,9 @@
                 <li class="nav-item"><a class="nav-link" href="/templates/cartelera.html">Cartelera</a></li>
                 <li class="nav-item"><a class="nav-link active" href="/templates/nosotros.html" style="color: #e50914 !important; font-weight: bold;">Nosotros</a></li>
                 
+                <li class="nav-item" id="nav-saludo" style="display: none; margin-left: 15px;">
+                    <span style="background-color: #4caf50; color: white; padding: 6px 14px; border-radius: 20px; font-weight: bold; font-size: 0.9rem;">👋 <span id="nombre-navbar"></span></span>
+                </li>
                 <li class="nav-item" id="nav-login">
                     <a class="nav-link" href="/templates/login.html" style="font-weight: bold;">Iniciar Sesión</a>
                 </li>
@@ -169,11 +172,14 @@
             if (usuario) {
                 document.getElementById('nav-login').style.display = 'none';
                 document.getElementById('nav-logout').style.display = 'block';
+                document.getElementById('nav-saludo').style.display = 'block';
+                document.getElementById('nombre-navbar').textContent = localStorage.getItem('nombreActivo') || usuario;
             }
         });
 
         function cerrarSesion() {
             localStorage.removeItem('usuarioActivo');
+            localStorage.removeItem('nombreActivo');
             window.location.reload(); 
         }
     </script>

@@ -43,6 +43,9 @@
                 <li class="nav-item"><a class="nav-link" href="/">Inicio</a></li>
                 <li class="nav-item"><a class="nav-link" href="/templates/cartelera.html">Cartelera</a></li>
                 <li class="nav-item"><a class="nav-link" href="/templates/nosotros.html">Nosotros</a></li>
+                <li class="nav-item" id="nav-saludo" style="display: none; margin-left: 15px;">
+                    <span style="background-color: #4caf50; color: white; padding: 6px 14px; border-radius: 20px; font-weight: bold; font-size: 0.9rem;">👋 <span id="nombre-navbar"></span></span>
+                </li>
                 <li class="nav-item" id="nav-login"><a class="nav-link" href="/templates/login.html">Iniciar Sesión</a></li>
                 <li class="nav-item" id="nav-logout" style="display: none;"><a class="nav-link" href="#" onclick="cerrarSesion()" style="color: #e50914;">Cerrar Sesión</a></li>
             </ul>
@@ -53,6 +56,10 @@
         <div class="login-container">
             <h2 class="text-center mb-4">Acceder</h2>
             <form id="auth-form">
+                <div class="form-group">
+                    <label for="nombre">Nombre (solo para registrarte)</label>
+                    <input type="text" class="form-control" id="nombre" placeholder="¿Cómo quieres que te llamemos?">
+                </div>
                 <div class="form-group">
                     <label for="correo">Correo Electrónico</label>
                     <input type="email" class="form-control" id="correo" placeholder="usuario@correo.com" required>
@@ -73,23 +80,30 @@
             if (usuario) {
                 document.getElementById('nav-login').style.display = 'none';
                 document.getElementById('nav-logout').style.display = 'block';
+                document.getElementById('nav-saludo').style.display = 'block';
+                document.getElementById('nombre-navbar').textContent = localStorage.getItem('nombreActivo') || usuario;
             }
         });
 
         function cerrarSesion() {
             localStorage.removeItem('usuarioActivo');
-            window.location.href = "/"; 
+            localStorage.removeItem('nombreActivo');
+            window.location.href = "/";
         }
 
         async function registrar() {
+            const nombre = document.getElementById('nombre').value;
             const correo = document.getElementById('correo').value;
             const contrasena = document.getElementById('password').value;
-            if(!correo || !contrasena) { alert("Llena ambos campos."); return; }
+            if (!nombre || !correo || !contrasena) {
+                alert("Llena tu nombre, correo y contraseña para registrarte.");
+                return;
+            }
 
             const respuesta = await fetch('/api/registro', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ correo, contrasena })
+                body: JSON.stringify({ nombre, correo, contrasena })
             });
             const datos = await respuesta.json();
             alert(datos.mensaje);
@@ -98,7 +112,7 @@
         async function iniciarSesion() {
             const correo = document.getElementById('correo').value;
             const contrasena = document.getElementById('password').value;
-            if(!correo || !contrasena) { alert("Llena ambos campos."); return; }
+            if (!correo || !contrasena) { alert("Llena correo y contraseña."); return; }
 
             const respuesta = await fetch('/api/login', {
                 method: 'POST',
@@ -106,10 +120,13 @@
                 body: JSON.stringify({ correo, contrasena })
             });
             const datos = await respuesta.json();
-            
+
             if (datos.exito) {
+                // Guardamos el correo (identificador) y el nombre (para mostrar),
+                // el nombre viene del backend -- no hay que volver a preguntarlo.
                 localStorage.setItem('usuarioActivo', correo);
-                window.location.href = "/templates/asientos.html"; 
+                localStorage.setItem('nombreActivo', datos.nombre);
+                window.location.href = "/templates/asientos.html";
             } else {
                 alert(datos.mensaje);
             }
