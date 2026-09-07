@@ -25,24 +25,37 @@ sala_asientos.reservar(1, 3, "Ana")
 # --- SISTEMA DE AUTENTICACIÓN TEMPORAL EN MEMORIA ---
 usuarios_db = {}
 
-class Usuario(BaseModel):
+# --- MODELOS DE AUTENTICACIÓN ---
+class UsuarioRegistro(BaseModel):
+    correo: str
+    contrasena: str
+    nombre: str
+
+class UsuarioLogin(BaseModel):
     correo: str
     contrasena: str
 
+
 @app.post("/api/registro")
-async def registrar_usuario(usuario: Usuario):
+async def registrar_usuario(usuario: UsuarioRegistro):
     if usuario.correo in usuarios_db:
         return {"mensaje": "El usuario ya existe. Intenta iniciar sesión.", "exito": False}
-    usuarios_db[usuario.correo] = usuario.contrasena
+    usuarios_db[usuario.correo] = {"contrasena": usuario.contrasena, "nombre": usuario.nombre}
     print("--- BASE DE DATOS ACTUALIZADA ---")
     print(usuarios_db)
     print("---------------------------------")
     return {"mensaje": "Registro exitoso. Ahora puedes iniciar sesión.", "exito": True}
 
+
 @app.post("/api/login")
-async def login_usuario(usuario: Usuario):
-    if usuario.correo in usuarios_db and usuarios_db[usuario.correo] == usuario.contrasena:
-        return {"mensaje": "¡Bienvenido a Cine Santa Fe!", "exito": True}
+async def login_usuario(usuario: UsuarioLogin):
+    registro = usuarios_db.get(usuario.correo)
+    if registro and registro["contrasena"] == usuario.contrasena:
+        return {
+            "mensaje": f"¡Bienvenido, {registro['nombre']}!",
+            "exito": True,
+            "nombre": registro["nombre"],
+        }
     return {"mensaje": "Correo o contraseña incorrectos.", "exito": False}
 
 # --- MODELO PARA EL CRUD DEL VECTOR ---
