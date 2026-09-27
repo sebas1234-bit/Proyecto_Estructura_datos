@@ -6,11 +6,6 @@ Programación Orientada a Objetos, que aplica las estructuras de datos
 fundamentales del curso a un caso real: gestión de películas, asientos y
 reservas.
 
-> Nota: el proyecto empezó como una aplicación web (FastAPI + HTML + tiempo
-> real con WebSockets), pero se replanteó a esta versión de terminal para
-> enfocarnos mejor en POO, estructuras de datos y validaciones, sin la
-> complejidad adicional de una interfaz web.
-
 ## Integrantes
 
 - Juan José Quinchia
