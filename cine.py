@@ -286,10 +286,71 @@ class Cine:
     # ========================================================
 
     def actualizar_pelicula(self):
-        pass
+        print("\n===== ACTUALIZAR PELÍCULA =====")
+        if self.peliculas.esta_vacio():
+            print("No hay películas registradas.")
+            return
+
+        id_pelicula = leer_entero("ID de la película a actualizar: ")
+        pelicula = self.peliculas.buscar_por_id(id_pelicula)
+        if pelicula is None:
+            print("No existe una película con ese ID.")
+            return
+
+        print("\nPelícula encontrada:\n")
+        print(pelicula)
+        print("\n(Deja vacío y presiona Enter para conservar el valor actual)")
+
+        nuevo_titulo = input("Nuevo título: ").strip()
+        nuevo_genero = input("Nuevo género: ").strip()
+
+        while True:
+            nueva_duracion = input("Nueva duración (minutos): ").strip()
+            if nueva_duracion == "" or (nueva_duracion.isdigit() and int(nueva_duracion) > 0):
+                break
+            print("Entrada inválida: escribe un número mayor a 0 o deja vacío.")
+
+        if nuevo_titulo:
+            pelicula.titulo = nuevo_titulo
+        if nuevo_genero:
+            pelicula.genero = nuevo_genero
+        if nueva_duracion:
+            pelicula.duracion = int(nueva_duracion)
+
+        print("\nPelícula actualizada:\n")
+        print(pelicula)
 
     def eliminar_pelicula(self):
-        pass
+        print("\n===== ELIMINAR PELÍCULA =====")
+        if self.peliculas.esta_vacio():
+            print("No hay películas registradas.")
+            return
+
+        self.mostrar_peliculas()
+        id_pelicula = leer_entero("ID de la película a eliminar: ")
+        pelicula = self.peliculas.buscar_por_id(id_pelicula)
+        if pelicula is None:
+            print("No existe una película con ese ID.")
+            return
+
+        if self.reservas.tiene_reservas_de(pelicula):
+            print("No se puede eliminar: la película tiene reservas activas.")
+            return
+
+        confirmar = input(f"¿Eliminar '{pelicula.titulo}'? (s/n): ").strip().lower()
+        if confirmar == "s":
+            self.peliculas.eliminar(id_pelicula)
+            print("Película eliminada.")
+        else:
+            print("Operación cancelada.")
 
     def mostrar_historial(self):
-        pass
+        print("\n===== HISTORIAL DE RESERVAS CANCELADAS =====")
+        if self.historial.esta_vacia():
+            print("No hay reservas canceladas.")
+            return
+
+        print("\n--- Del inicio al final ---")
+        self.historial.mostrar_inicio_fin()
+        print("\n--- Del final al inicio ---")
+        self.historial.mostrar_fin_inicio()
