@@ -3,6 +3,8 @@
 # HISTORIAL (recorrible en ambos sentidos)
 # ============================================================
 
+
+
 from estructuras.nodo import NodoDoble
 
 
@@ -27,7 +29,8 @@ class ListaDobleHistorial:
             nuevo.anterior = self.cola
             self.cola.siguiente = nuevo
             self.cola = nuevo
-        def esta_vacia(self):
+
+    def esta_vacia(self):
 
         return self.cabeza is None
 
