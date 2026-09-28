@@ -284,73 +284,121 @@ class Cine:
     # ========================================================
     # FUNCIONES DE NICOL
     # ========================================================
+    # ========================================================
+    # FUNCIONES DE NICOL
+    # ========================================================
 
     def actualizar_pelicula(self):
-        print("\n===== ACTUALIZAR PELÍCULA =====")
-        if self.peliculas.esta_vacio():
+
+        print("\n========== ACTUALIZAR PELÍCULA ==========")
+
+        if len(self.vector_peliculas.obtener_todas()) == 0:
             print("No hay películas registradas.")
             return
 
-        id_pelicula = leer_entero("ID de la película a actualizar: ")
-        pelicula = self.peliculas.buscar_por_id(id_pelicula)
+        while True:
+
+            try:
+                id_pelicula = int(input("ID de la película a actualizar: "))
+                break
+
+            except ValueError:
+                print("Ingrese un ID válido.")
+
+        pelicula = self.vector_peliculas.buscar_por_id(id_pelicula)
+
         if pelicula is None:
             print("No existe una película con ese ID.")
             return
 
         print("\nPelícula encontrada:\n")
-        print(pelicula)
+        pelicula.mostrar_informacion()
+
         print("\n(Deja vacío y presiona Enter para conservar el valor actual)")
 
         nuevo_titulo = input("Nuevo título: ").strip()
         nuevo_genero = input("Nuevo género: ").strip()
 
         while True:
+
             nueva_duracion = input("Nueva duración (minutos): ").strip()
+
             if nueva_duracion == "" or (nueva_duracion.isdigit() and int(nueva_duracion) > 0):
                 break
+
             print("Entrada inválida: escribe un número mayor a 0 o deja vacío.")
 
-        if nuevo_titulo:
+        # La actualización se hace directamente sobre el objeto Pelicula
+        if nuevo_titulo != "":
             pelicula.titulo = nuevo_titulo
-        if nuevo_genero:
+
+        if nuevo_genero != "":
             pelicula.genero = nuevo_genero
-        if nueva_duracion:
+
+        if nueva_duracion != "":
             pelicula.duracion = int(nueva_duracion)
 
-        print("\nPelícula actualizada:\n")
-        print(pelicula)
+        print("\nPelícula actualizada correctamente:\n")
+        pelicula.mostrar_informacion()
+
 
     def eliminar_pelicula(self):
-        print("\n===== ELIMINAR PELÍCULA =====")
-        if self.peliculas.esta_vacio():
+
+        print("\n========== ELIMINAR PELÍCULA ==========")
+
+        if len(self.vector_peliculas.obtener_todas()) == 0:
             print("No hay películas registradas.")
             return
 
         self.mostrar_peliculas()
-        id_pelicula = leer_entero("ID de la película a eliminar: ")
-        pelicula = self.peliculas.buscar_por_id(id_pelicula)
+
+        while True:
+
+            try:
+                id_pelicula = int(input("\nID de la película a eliminar: "))
+                break
+
+            except ValueError:
+                print("Ingrese un ID válido.")
+
+        pelicula = self.vector_peliculas.buscar_por_id(id_pelicula)
+
         if pelicula is None:
             print("No existe una película con ese ID.")
             return
 
-        if self.reservas.tiene_reservas_de(pelicula):
-            print("No se puede eliminar: la película tiene reservas activas.")
-            return
+        # No se elimina si tiene reservas activas
+        actual = self.lista_reservas.cabeza
+
+        while actual is not None:
+
+            if actual.dato.pelicula is pelicula:
+                print("No se puede eliminar: la película tiene reservas activas.")
+                return
+
+            actual = actual.siguiente
 
         confirmar = input(f"¿Eliminar '{pelicula.titulo}'? (s/n): ").strip().lower()
+
         if confirmar == "s":
-            self.peliculas.eliminar(id_pelicula)
-            print("Película eliminada.")
+            self.vector_peliculas.eliminar_por_id(id_pelicula)
+            print("Película eliminada correctamente.")
+
         else:
             print("Operación cancelada.")
 
+
     def mostrar_historial(self):
-        print("\n===== HISTORIAL DE RESERVAS CANCELADAS =====")
+
+        print("\n========== HISTORIAL DE RESERVAS CANCELADAS ==========")
+
         if self.historial.esta_vacia():
             print("No hay reservas canceladas.")
             return
 
         print("\n--- Del inicio al final ---")
         self.historial.mostrar_inicio_fin()
+
         print("\n--- Del final al inicio ---")
         self.historial.mostrar_fin_inicio()
+  
