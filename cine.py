@@ -271,8 +271,22 @@ class Cine:
     # FUNCIONES DE SEBASTIAN
     # ========================================================
 
+    
     def buscar_pelicula(self):
-        pass
+        print("\n========== BUSCAR PELÍCULA ==========")
+        try:
+            id_pelicula = int(input("Ingrese el id: "))  
+        except ValueError:
+            print("Ingrese un ID valido")
+            return
+
+        pelicula = self.vector_peliculas.buscar_por_id(id_pelicula)
+
+        if pelicula is None:
+            print("No existe pelicula con ese ID")
+        else: 
+            print("\nPelicula encontrada: ")     
+            pelicula.mostrar_informacion()
 
     def mostrar_reservas(self):
         pass
@@ -280,13 +294,6 @@ class Cine:
     def cancelar_reserva(self):
         pass
 
-
-    # ========================================================
-    # FUNCIONES DE NICOL
-    # ========================================================
-    # ========================================================
-    # FUNCIONES DE NICOL
-    # ========================================================
 
     def actualizar_pelicula(self):
 
