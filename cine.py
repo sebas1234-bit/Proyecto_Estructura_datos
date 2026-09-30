@@ -1,18 +1,11 @@
-# ============================================================
-# CLASE CINE
-# Coordina todas las estructuras del sistema
-# ============================================================
-
+# CLASE CINE, Coordina todas las estructuras del sistema
 from modelos.persona import Persona
 from modelos.reserva import Reserva
-
 from estructuras.vector_peliculas import VectorPeliculas
 from estructuras.matriz_asientos import MatrizAsientos
 from estructuras.lista_simple_reservas import ListaSimpleReservas
 from estructuras.lista_doble_historial import ListaDobleHistorial
-
 from modelos.pelicula import Pelicula
-
 
 class Cine:
 
@@ -29,13 +22,9 @@ class Cine:
         self.siguiente_id_pelicula = 1
 
 
-    # ========================================================
-    # AGREGAR PELICULA  (Juan José)
-    # ========================================================
-
     def agregar_pelicula(self):
 
-        print("\n========== AGREGAR PELÍCULA ==========")
+        print("\nAGREGAR PELÍCULA ")
 
         titulo = input("Título: ").strip()
 
@@ -81,13 +70,10 @@ class Cine:
         self.siguiente_id_pelicula += 1
 
 
-    # ========================================================
-    # MOSTRAR PELICULAS  (Juan José)
-    # ========================================================
 
     def mostrar_peliculas(self):
 
-        print("\n========== CARTELERA ==========")
+        print("\nCARTELERA")
 
         peliculas = self.vector_peliculas.obtener_todas()
 
@@ -101,13 +87,9 @@ class Cine:
             print("----------------------------------------")
 
 
-    # ========================================================
-    # RESERVAR  (Juan José)
-    # ========================================================
-
     def reservar(self):
 
-        print("\n========== REALIZAR RESERVA ==========")
+        print("\nREALIZAR RESERVA")
 
         peliculas = self.vector_peliculas.obtener_todas()
 
@@ -116,15 +98,7 @@ class Cine:
             print("No hay películas disponibles.")
             return
 
-        # ----------------------------------------------------
-        # MOSTRAR PELICULAS
-        # ----------------------------------------------------
-
         self.mostrar_peliculas()
-
-        # ----------------------------------------------------
-        # SELECCIONAR PELICULA
-        # ----------------------------------------------------
 
         while True:
 
@@ -149,15 +123,7 @@ class Cine:
 
                 print("Ingrese un ID válido.")
 
-        # ----------------------------------------------------
-        # MOSTRAR ASIENTOS
-        # ----------------------------------------------------
-
         self.matriz_asientos.mostrar()
-
-        # ----------------------------------------------------
-        # SELECCIONAR ASIENTO
-        # ----------------------------------------------------
 
         while True:
 
@@ -192,11 +158,7 @@ class Cine:
 
                 print("Ingrese números válidos.")
 
-        # ----------------------------------------------------
-        # DATOS DE LA PERSONA
-        # ----------------------------------------------------
-
-        print("\n========== DATOS DEL CLIENTE ==========")
+        print("\nDATOS DEL CLIENTE")
 
         nombre = input("Nombre completo: ").strip()
 
@@ -228,19 +190,11 @@ class Cine:
 
                 print("Ingrese una edad válida.")
 
-        # ----------------------------------------------------
-        # CREAR PERSONA
-        # ----------------------------------------------------
-
         persona = Persona(
             nombre,
             documento,
             edad
         )
-
-        # ----------------------------------------------------
-        # CREAR RESERVA
-        # ----------------------------------------------------
 
         reserva = Reserva(
             persona,
@@ -248,16 +202,9 @@ class Cine:
             asiento
         )
 
-        # ----------------------------------------------------
-        # OCUPAR ASIENTO
-        # ----------------------------------------------------
-
         asiento.ocupar()
 
-        # ----------------------------------------------------
-        # GUARDAR RESERVA
-        # ----------------------------------------------------
-
+  
         self.lista_reservas.agregar(reserva)
 
         print("\n========================================")
@@ -266,14 +213,8 @@ class Cine:
 
         reserva.mostrar_reserva()
 
-
-    # ========================================================
-    # FUNCIONES DE SEBASTIAN
-    # ========================================================
-
-    
     def buscar_pelicula(self):
-        print("\n========== BUSCAR PELÍCULA ==========")
+        print("\nBUSCAR PELÍCULA")
         try:
             id_pelicula = int(input("Ingrese el id: "))  
         except ValueError:
@@ -289,15 +230,45 @@ class Cine:
             pelicula.mostrar_informacion()
 
     def mostrar_reservas(self):
-        pass
+        self.lista_reservas.mostrar()
 
     def cancelar_reserva(self):
-        pass
+            print("\nCANCELAR RESERVA")
+    
+            documento = input("Documento de la persona: ").strip()
+    
+            reserva = self.lista_reservas.buscar_por_documento(documento)
+    
+            if reserva is None:
+                print("No se encontró ninguna reserva con ese documento.")
+                return
+    
+            print("\nReserva encontrada:")
+            reserva.mostrar_reserva()
+    
+            confirmar = input("¿Confirmar cancelación? (s/n): ").strip().lower()
+    
+            if confirmar != "s":
+                print("Operación cancelada.")
+                return
+    
+    
+            reserva.asiento.liberar()
+    
+            self.lista_reservas.eliminar(reserva)
+    
+            self.historial.agregar(reserva)
+    
+            print("\nReserva cancelada correctamente. El asiento quedó libre.")
+ 
+ 
+
+  
 
 
     def actualizar_pelicula(self):
 
-        print("\n========== ACTUALIZAR PELÍCULA ==========")
+        print("\nACTUALIZAR PELÍCULA")
 
         if len(self.vector_peliculas.obtener_todas()) == 0:
             print("No hay películas registradas.")
@@ -351,7 +322,7 @@ class Cine:
 
     def eliminar_pelicula(self):
 
-        print("\n========== ELIMINAR PELÍCULA ==========")
+        print("\nELIMINAR PELÍCULA")
 
         if len(self.vector_peliculas.obtener_todas()) == 0:
             print("No hay películas registradas.")
@@ -397,7 +368,7 @@ class Cine:
 
     def mostrar_historial(self):
 
-        print("\n========== HISTORIAL DE RESERVAS CANCELADAS ==========")
+        print("\nHISTORIAL DE RESERVAS CANCELADAS")
 
         if self.historial.esta_vacia():
             print("No hay reservas canceladas.")
