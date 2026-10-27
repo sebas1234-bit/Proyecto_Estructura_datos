@@ -6,6 +6,8 @@ from estructuras.matriz_asientos import MatrizAsientos
 from estructuras.lista_simple_reservas import ListaSimpleReservas
 from estructuras.lista_doble_historial import ListaDobleHistorial
 from modelos.pelicula import Pelicula
+from estructuras.pila_operaciones import PilaOperaciones
+from modelos.operacion import OperacionReserva, OperacionCancelacion
 
 class Cine:
 
@@ -18,6 +20,8 @@ class Cine:
         self.lista_reservas = ListaSimpleReservas()
 
         self.historial = ListaDobleHistorial()
+
+        self.pila_operaciones = PilaOperaciones() 
 
         self.siguiente_id_pelicula = 1
 
@@ -206,6 +210,7 @@ class Cine:
 
   
         self.lista_reservas.agregar(reserva)
+        self.pila_operaciones.push(OperacionReserva(reserva))
 
         print("\n========================================")
         print("RESERVA REALIZADA CORRECTAMENTE")
@@ -258,6 +263,7 @@ class Cine:
             self.lista_reservas.eliminar(reserva)
     
             self.historial.agregar(reserva)
+            self.pila_operaciones.push(OperacionCancelacion(reserva))
     
             print("\nReserva cancelada correctamente. El asiento quedó libre.")
  
@@ -380,3 +386,33 @@ class Cine:
         print("\n--- Del final al inicio ---")
         self.historial.mostrar_fin_inicio()
   
+
+    def mostrar_ultimas_operaciones(self):
+
+        print("\nÚLTIMAS OPERACIONES (la más reciente primero)")
+
+        if self.pila_operaciones.esta_vacia():
+            print("No hay operaciones registradas.")
+            return
+
+        self.pila_operaciones.mostrar(5)
+
+    def deshacer_ultima_operacion(self):
+
+        print("\nDESHACER ÚLTIMA ACCIÓN")
+
+        operacion = self.pila_operaciones.peek()
+
+        if operacion is None:
+            print("No hay acciones para deshacer.")
+            return
+
+        print("\nSe va a revertir:")
+        operacion.mostrar()
+
+        exito, mensaje = operacion.deshacer(self)
+
+        if exito:
+            self.pila_operaciones.pop()
+
+        print(f"\n{mensaje}")
