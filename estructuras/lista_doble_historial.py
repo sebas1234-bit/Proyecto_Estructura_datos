@@ -51,3 +51,20 @@ class ListaDobleHistorial:
 
             actual.dato.mostrar_reserva()
             actual = actual.anterior
+
+        def eliminar_ultimo(self):
+
+            if self.cola is None:
+                return None
+
+            reserva = self.cola.dato
+
+            if self.cola.anterior is None:
+                self.cabeza = None
+                self.cola = None
+
+            else:
+                self.cola = self.cola.anterior
+                self.cola.siguiente = None
+
+            return reserva

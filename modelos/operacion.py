@@ -34,6 +34,8 @@ class Operacion:
         """Revierte la operación. Devuelve (exito, mensaje)."""
         raise NotImplementedError("Cada operación debe implementar deshacer()")
 
+  
+
 
 class OperacionReserva(Operacion):
     """Se apila al confirmar una reserva. Deshacer = anular esa reserva."""
