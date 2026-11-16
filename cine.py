@@ -8,6 +8,7 @@ from estructuras.lista_doble_historial import ListaDobleHistorial
 from modelos.pelicula import Pelicula
 from estructuras.pila_operaciones import PilaOperaciones
 from modelos.operacion import OperacionReserva, OperacionCancelacion
+from recomendador import construir_arbol_recomendacion, UMBRAL_MINUTOS
 
 class Cine:
 
@@ -423,3 +424,88 @@ class Cine:
             self.pila_operaciones.pop()
 
         print(f"\n{mensaje}")
+
+    def recomendar_pelicula(self):
+
+        print("\nASISTENTE DE RECOMENDACIÓN")
+
+        peliculas = self.vector_peliculas.obtener_todas()
+
+        if len(peliculas) == 0:
+            print("No hay películas registradas.")
+            return
+
+        while True:
+
+            try:
+                minutos = int(input("¿Cuántos minutos tienes disponibles?: "))
+
+                if minutos <= 0:
+                    print("Debe ser mayor que 0.")
+                    continue
+
+                break
+
+            except ValueError:
+                print("Ingrese un número válido.")
+
+        arbol = construir_arbol_recomendacion(peliculas)
+
+        nodo = arbol.raiz
+        ruta = []
+
+        # Raíz: izquierda si tiene poco tiempo, derecha si no.
+        if minutos < UMBRAL_MINUTOS:
+            ruta.append(f"{nodo.info} -> Sí")
+            nodo = nodo.izq
+
+        else:
+            ruta.append(f"{nodo.info} -> No")
+            nodo = nodo.der
+
+        # Se baja por el árbol hasta llegar a una hoja.
+        while not nodo.es_hoja():
+
+            respuesta = input(f"\n{nodo.info} (s/n): ").strip().lower()
+
+            if respuesta == "s":
+                ruta.append(f"{nodo.info} -> Sí")
+                nodo = nodo.izq
+
+            elif respuesta == "n":
+                ruta.append(f"{nodo.info} -> No")
+                nodo = nodo.der
+
+            else:
+                print("Responda con 's' o 'n'.")
+
+        print("\nRuta de decisión:")
+
+        for paso in ruta:
+            print(f"  {paso}")
+
+        print(f"\n{nodo.info}")
+
+        if len(nodo.resultado) == 0:
+            print("Prueba con otro tiempo disponible.")
+            return
+
+        for pelicula in nodo.resultado:
+            print("----------------------------------------")
+            pelicula.mostrar_informacion()
+
+    def mostrar_arbol_recomendacion(self):
+
+        print("\nÁRBOL DE DECISIÓN DE RECOMENDACIÓN")
+
+        peliculas = self.vector_peliculas.obtener_todas()
+
+        if len(peliculas) == 0:
+            print("No hay películas registradas.")
+            return
+
+        arbol = construir_arbol_recomendacion(peliculas)
+
+        arbol.mostrar(lambda r: ", ".join(p.titulo for p in r))
+
+        print(f"\nAltura: {arbol.altura()}  |  Hojas: {arbol.contar_hojas()}")

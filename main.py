@@ -25,10 +25,12 @@ def main():
         print("6. Reservar asiento")
         print("7. Ver reservas")
         print("8. Cancelar reserva")
-        print("9. Ver historial")
+        print("9. Ver historial de reservas canceladas")
         print("10. Ver últimas operaciones")  # consulta (peek / recorrido)
         print("11. Deshacer última operación")  # reversión (LIFO)
-        print("12. Salir")
+        print("12. Recomendar película")
+        print("13. Ver árbol de recomendación")
+        print("14. Salir")
         print("========================================")
 
         opcion = input("Seleccione una opción: ").strip()
@@ -67,6 +69,12 @@ def main():
             cine.deshacer_ultima_operacion()
 
         elif opcion == "12":
+            cine.recomendar_pelicula()
+
+        elif opcion == "13":
+            cine.mostrar_arbol_recomendacion()
+
+        elif opcion == "14":
             print("\nGracias por utilizar Cine Santa Fe.")
             break
 
