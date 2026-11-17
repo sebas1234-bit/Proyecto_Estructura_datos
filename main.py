@@ -30,7 +30,8 @@ def main():
         print("11. Deshacer última operación")  # reversión (LIFO)
         print("12. Recomendar película")
         print("13. Ver árbol de recomendación")
-        print("14. Salir")
+        print("14. Ver lista de espera (Cola FIFO)")
+        print("15. Salir")
         print("========================================")
 
         opcion = input("Seleccione una opción: ").strip()
@@ -75,6 +76,9 @@ def main():
             cine.mostrar_arbol_recomendacion()
 
         elif opcion == "14":
+            cine.mostrar_cola_espera()
+
+        elif opcion == "15":
             print("\nGracias por utilizar Cine Santa Fe.")
             break
 
@@ -84,3 +88,4 @@ def main():
 
 if __name__ == "__main__":
     main()
+

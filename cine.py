@@ -1,4 +1,5 @@
 # CLASE CINE, Coordina todas las estructuras del sistema
+
 from modelos.persona import Persona
 from modelos.reserva import Reserva
 from estructuras.vector_peliculas import VectorPeliculas
@@ -9,6 +10,8 @@ from modelos.pelicula import Pelicula
 from estructuras.pila_operaciones import PilaOperaciones
 from modelos.operacion import OperacionReserva, OperacionCancelacion
 from recomendador import construir_arbol_recomendacion, UMBRAL_MINUTOS
+from estructuras.cola_espera import ColaEspera
+
 
 class Cine:
 
@@ -22,10 +25,37 @@ class Cine:
 
         self.historial = ListaDobleHistorial()
 
-        self.pila_operaciones = PilaOperaciones() 
+        self.pila_operaciones = PilaOperaciones()
+
+        self.cola_espera = ColaEspera()
 
         self.siguiente_id_pelicula = 1
 
+        self.cargar_datos_iniciales()
+
+    def cargar_datos_iniciales(self):
+        """Carga una película normal y un preestreno exclusivo con 3 cupos."""
+        p1 = Pelicula(
+            self.siguiente_id_pelicula,
+            "Avatar 3",
+            "Sci-Fi",
+            180,
+            es_preestreno=False,
+            cupo_maximo=30
+        )
+        self.vector_peliculas.agregar(p1)
+        self.siguiente_id_pelicula += 1
+
+        preestreno = Pelicula(
+            self.siguiente_id_pelicula,
+            "Avengers: Secret Wars",
+            "Acción / Marvel",
+            160,
+            es_preestreno=True,
+            cupo_maximo=3
+        )
+        self.vector_peliculas.agregar(preestreno)
+        self.siguiente_id_pelicula += 1
 
     def agregar_pelicula(self):
 
@@ -74,8 +104,6 @@ class Cine:
 
         self.siguiente_id_pelicula += 1
 
-
-
     def mostrar_peliculas(self):
 
         print("\nCARTELERA")
@@ -90,7 +118,6 @@ class Cine:
 
             pelicula.mostrar_informacion()
             print("----------------------------------------")
-
 
     def reservar(self):
 
@@ -127,41 +154,6 @@ class Cine:
             except ValueError:
 
                 print("Ingrese un ID válido.")
-
-        self.matriz_asientos.mostrar()
-
-        while True:
-
-            try:
-
-                fila = int(
-                    input("\nIngrese la fila del asiento: ")
-                )
-
-                columna = int(
-                    input("Ingrese la columna del asiento: ")
-                )
-
-                asiento = self.matriz_asientos.obtener_asiento(
-                    fila,
-                    columna
-                )
-
-                if asiento is None:
-
-                    print("El asiento seleccionado no existe.")
-                    continue
-
-                if not asiento.esta_disponible():
-
-                    print("Ese asiento ya está ocupado.")
-                    continue
-
-                break
-
-            except ValueError:
-
-                print("Ingrese números válidos.")
 
         print("\nDATOS DEL CLIENTE")
 
@@ -201,6 +193,55 @@ class Cine:
             edad
         )
 
+        # VALIDACIÓN DE CUPO (Si el preestreno se llenó -> add a la COLA FIFO)
+        if not pelicula.tiene_cupo():
+            print("\n========================================")
+            print(f"¡EL PREESTRENO '{pelicula.titulo}' ESTÁ AGOTADO!")
+            print("========================================")
+            opcion = input("¿Desea anotarse en la LISTA DE ESPERA (Cola FIFO - add)? (s/n): ").strip().lower()
+
+            if opcion == "s":
+                self.cola_espera.add(persona, pelicula)
+                print(f"\n¡ÉXITO! {persona.nombre} ha sido añadido a la lista de espera (Posición #{self.cola_espera.cantidad}).")
+            else:
+                print("Operación cancelada.")
+            return
+
+        self.matriz_asientos.mostrar()
+
+        while True:
+
+            try:
+
+                fila = int(
+                    input("\nIngrese la fila del asiento: ")
+                )
+
+                columna = int(
+                    input("Ingrese la columna del asiento: ")
+                )
+
+                asiento = self.matriz_asientos.obtener_asiento(
+                    fila,
+                    columna
+                )
+
+                if asiento is None:
+
+                    print("El asiento seleccionado no existe.")
+                    continue
+
+                if not asiento.esta_disponible():
+
+                    print("Ese asiento ya está ocupado.")
+                    continue
+
+                break
+
+            except ValueError:
+
+                print("Ingrese números válidos.")
+
         reserva = Reserva(
             persona,
             pelicula,
@@ -208,8 +249,8 @@ class Cine:
         )
 
         asiento.ocupar()
+        pelicula.reservas_actuales += 1
 
-  
         self.lista_reservas.agregar(reserva)
         self.pila_operaciones.push(OperacionReserva(reserva))
 
@@ -220,88 +261,144 @@ class Cine:
         reserva.mostrar_reserva()
 
     def buscar_pelicula(self):
+
         print("\nBUSCAR PELÍCULA")
         try:
-            id_pelicula = int(input("Ingrese el id: "))  
+
+            id_pelicula = int(input("Ingrese el id: "))
+
         except ValueError:
+
             print("Ingrese un ID valido")
             return
 
         pelicula = self.vector_peliculas.buscar_por_id(id_pelicula)
 
         if pelicula is None:
+
             print("No existe pelicula con ese ID")
-        else: 
-            print("\nPelicula encontrada: ")     
+
+        else:
+
+            print("\nPelicula encontrada: ")
             pelicula.mostrar_informacion()
 
     def mostrar_reservas(self):
+
         self.lista_reservas.mostrar()
 
     def cancelar_reserva(self):
-            print("\nCANCELAR RESERVA")
-    
-            documento = input("Documento de la persona: ").strip()
-    
-            reserva = self.lista_reservas.buscar_por_documento(documento)
-    
-            if reserva is None:
-                print("No se encontró ninguna reserva con ese documento.")
-                return
-    
-            print("\nReserva encontrada:")
-            reserva.mostrar_reserva()
-    
-            confirmar = input("¿Confirmar cancelación? (s/n): ").strip().lower()
-    
-            if confirmar != "s":
-                print("Operación cancelada.")
-                return
-    
-    
-            reserva.asiento.liberar()
-    
-            self.lista_reservas.eliminar(reserva)
-    
-            self.historial.agregar(reserva)
-            self.pila_operaciones.push(OperacionCancelacion(reserva))
-    
-            print("\nReserva cancelada correctamente. El asiento quedó libre.")
- 
- 
 
-  
+        print("\nCANCELAR RESERVA")
 
+        documento = input("Documento de la persona: ").strip()
+
+        reserva = self.lista_reservas.buscar_por_documento(documento)
+
+        if reserva is None:
+
+            print("No se encontró ninguna reserva con ese documento.")
+            return
+
+        print("\nReserva encontrada:")
+
+        reserva.mostrar_reserva()
+
+        confirmar = input("¿Confirmar cancelación? (s/n): ").strip().lower()
+
+        if confirmar != "s":
+
+            print("Operación cancelada.")
+            return
+
+        asiento_liberado = reserva.asiento
+        pelicula_afectada = reserva.pelicula
+
+        asiento_liberado.liberar()
+        pelicula_afectada.reservas_actuales -= 1
+
+        self.lista_reservas.eliminar(reserva)
+
+        self.historial.agregar(reserva)
+
+        self.pila_operaciones.push(OperacionCancelacion(reserva))
+
+        print("\n========================================")
+        print("RESERVA CANCELADA CORRECTAMENTE")
+        print(f"El asiento [Fila {asiento_liberado.fila}, Columna {asiento_liberado.columna}] ha quedado LIBRE.")
+        print("========================================")
+
+        # REVISIÓN DE LA COLA FIFO (PEEK y POLL)
+        if not self.cola_espera.esta_vacia():
+
+            siguiente = self.cola_espera.peek()
+
+            if siguiente["pelicula"].id_pelicula == pelicula_afectada.id_pelicula:
+
+                persona_espera = siguiente["persona"]
+
+                print("\n--------------------------------------------------")
+                print("¡ATENCIÓN! HAY UN CLIENTE EN LISTA DE ESPERA (COLA FIFO)")
+                print("--------------------------------------------------")
+                print(f"Cliente en turno: {persona_espera.nombre} (Doc: {persona_espera.documento})")
+                print(f"Película solicitada: '{pelicula_afectada.titulo}'")
+
+                asignar = input("\nHay un puesto libre. ¿Desea asignarlo a este cliente para el preestreno? (s/n): ").strip().lower()
+
+                if asignar == "s":
+
+                    cliente_desencolado = self.cola_espera.poll()
+
+                    asiento_liberado.ocupar()
+                    pelicula_afectada.reservas_actuales += 1
+
+                    nueva_reserva = Reserva(
+                        cliente_desencolado["persona"],
+                        cliente_desencolado["pelicula"],
+                        asiento_liberado
+                    )
+
+                    self.lista_reservas.agregar(nueva_reserva)
+                    self.pila_operaciones.push(OperacionReserva(nueva_reserva))
+
+                    print("\n¡ÉXITO! Reserva reasignada automáticamente desde la lista de espera:")
+                    nueva_reserva.mostrar_reserva()
 
     def actualizar_pelicula(self):
 
         print("\nACTUALIZAR PELÍCULA")
 
         if len(self.vector_peliculas.obtener_todas()) == 0:
+
             print("No hay películas registradas.")
             return
 
         while True:
 
             try:
+
                 id_pelicula = int(input("ID de la película a actualizar: "))
                 break
 
             except ValueError:
+
                 print("Ingrese un ID válido.")
 
         pelicula = self.vector_peliculas.buscar_por_id(id_pelicula)
 
         if pelicula is None:
+
             print("No existe una película con ese ID.")
             return
 
         print("\nPelícula encontrada:\n")
+
         pelicula.mostrar_informacion()
 
         print("\n(Deja vacío y presiona Enter para conservar el valor actual)")
 
         nuevo_titulo = input("Nuevo título: ").strip()
+
         nuevo_genero = input("Nuevo género: ").strip()
 
         while True:
@@ -309,29 +406,33 @@ class Cine:
             nueva_duracion = input("Nueva duración (minutos): ").strip()
 
             if nueva_duracion == "" or (nueva_duracion.isdigit() and int(nueva_duracion) > 0):
+
                 break
 
             print("Entrada inválida: escribe un número mayor a 0 o deja vacío.")
 
-        # La actualización se hace directamente sobre el objeto Pelicula
         if nuevo_titulo != "":
+
             pelicula.titulo = nuevo_titulo
 
         if nuevo_genero != "":
+
             pelicula.genero = nuevo_genero
 
         if nueva_duracion != "":
+
             pelicula.duracion = int(nueva_duracion)
 
         print("\nPelícula actualizada correctamente:\n")
-        pelicula.mostrar_informacion()
 
+        pelicula.mostrar_informacion()
 
     def eliminar_pelicula(self):
 
         print("\nELIMINAR PELÍCULA")
 
         if len(self.vector_peliculas.obtener_todas()) == 0:
+
             print("No hay películas registradas.")
             return
 
@@ -340,24 +441,27 @@ class Cine:
         while True:
 
             try:
+
                 id_pelicula = int(input("\nID de la película a eliminar: "))
                 break
 
             except ValueError:
+
                 print("Ingrese un ID válido.")
 
         pelicula = self.vector_peliculas.buscar_por_id(id_pelicula)
 
         if pelicula is None:
+
             print("No existe una película con ese ID.")
             return
 
-        # No se elimina si tiene reservas activas
         actual = self.lista_reservas.cabeza
 
         while actual is not None:
 
             if actual.dato.pelicula is pelicula:
+
                 print("No se puede eliminar: la película tiene reservas activas.")
                 return
 
@@ -366,37 +470,45 @@ class Cine:
         confirmar = input(f"¿Eliminar '{pelicula.titulo}'? (s/n): ").strip().lower()
 
         if confirmar == "s":
+
             self.vector_peliculas.eliminar_por_id(id_pelicula)
             print("Película eliminada correctamente.")
 
         else:
-            print("Operación cancelada.")
 
+            print("Operación cancelada.")
 
     def mostrar_historial(self):
 
         print("\nHISTORIAL DE RESERVAS CANCELADAS")
 
         if self.historial.esta_vacia():
+
             print("No hay reservas canceladas.")
             return
 
         print("\n--- Del inicio al final ---")
+
         self.historial.mostrar_inicio_fin()
 
         print("\n--- Del final al inicio ---")
+
         self.historial.mostrar_fin_inicio()
-  
+
+    def mostrar_cola_espera(self):
+
+        self.cola_espera.mostrar()
+
     def mostrar_ultimas_operaciones(self):
         """Consulta (solo lectura) de las últimas 5 operaciones."""
 
         print("\nÚLTIMAS OPERACIONES (la más reciente primero)")
 
         if self.pila_operaciones.esta_vacia():
+
             print("No hay operaciones registradas.")
             return
 
-        # mostrar() recorre la pila sin desapilar nada.
         self.pila_operaciones.mostrar(5)
 
     def deshacer_ultima_operacion(self):
@@ -404,26 +516,24 @@ class Cine:
 
         print("\nDESHACER ÚLTIMA ACCIÓN")
 
-        # peek() solo consulta; todavía no se quita nada de la pila.
         operacion = self.pila_operaciones.peek()
 
         if operacion is None:
+
             print("No hay acciones para deshacer.")
             return
 
         print("\nSe va a revertir:")
+
         operacion.mostrar()
 
-        # Polimorfismo: no importa si es reserva o cancelación,
-        # cada operación sabe cómo deshacerse a sí misma.
         exito, mensaje = operacion.deshacer(self)
 
-        # Se desapila únicamente si la reversión salió bien. Si falló,
-        # la operación sigue en la pila y el estado no se corrompe.
         if exito:
+
             self.pila_operaciones.pop()
 
-        print(f"\n{mensaje}")
+            print(f"\n{mensaje}")
 
     def recomendar_pelicula(self):
 
@@ -432,65 +542,76 @@ class Cine:
         peliculas = self.vector_peliculas.obtener_todas()
 
         if len(peliculas) == 0:
+
             print("No hay películas registradas.")
             return
 
         while True:
 
             try:
+
                 minutos = int(input("¿Cuántos minutos tienes disponibles?: "))
 
                 if minutos <= 0:
+
                     print("Debe ser mayor que 0.")
                     continue
 
                 break
 
             except ValueError:
+
                 print("Ingrese un número válido.")
 
         arbol = construir_arbol_recomendacion(peliculas)
 
         nodo = arbol.raiz
+
         ruta = []
 
-        # Raíz: izquierda si tiene poco tiempo, derecha si no.
         if minutos < UMBRAL_MINUTOS:
+
             ruta.append(f"{nodo.info} -> Sí")
             nodo = nodo.izq
 
         else:
+
             ruta.append(f"{nodo.info} -> No")
             nodo = nodo.der
 
-        # Se baja por el árbol hasta llegar a una hoja.
         while not nodo.es_hoja():
 
             respuesta = input(f"\n{nodo.info} (s/n): ").strip().lower()
 
             if respuesta == "s":
+
                 ruta.append(f"{nodo.info} -> Sí")
                 nodo = nodo.izq
 
             elif respuesta == "n":
+
                 ruta.append(f"{nodo.info} -> No")
                 nodo = nodo.der
 
             else:
+
                 print("Responda con 's' o 'n'.")
 
         print("\nRuta de decisión:")
 
         for paso in ruta:
-            print(f"  {paso}")
+
+            print(f" {paso}")
 
         print(f"\n{nodo.info}")
 
         if len(nodo.resultado) == 0:
+
             print("Prueba con otro tiempo disponible.")
             return
 
         for pelicula in nodo.resultado:
+
             print("----------------------------------------")
             pelicula.mostrar_informacion()
 
@@ -501,6 +622,7 @@ class Cine:
         peliculas = self.vector_peliculas.obtener_todas()
 
         if len(peliculas) == 0:
+
             print("No hay películas registradas.")
             return
 
@@ -508,4 +630,4 @@ class Cine:
 
         arbol.mostrar(lambda r: ", ".join(p.titulo for p in r))
 
-        print(f"\nAltura: {arbol.altura()}  |  Hojas: {arbol.contar_hojas()}")
+        print(f"\nAltura: {arbol.altura()} | Hojas: {arbol.contar_hojas()}")
