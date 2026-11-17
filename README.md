@@ -27,9 +27,11 @@ python main.py
 cine-santa-fe/
 ├── main.py                          # Punto de entrada: menú y bucle principal
 ├── cine.py                          # Clase Cine: coordina todas las estructuras
+├── recomendador.py                  # Clase Recomendador: Gestiona películas por duración y género
 ├── modelos/
 │   ├── persona.py                   # Clase Persona
 │   ├── pelicula.py                  # Clase Pelicula
+│   ├── operacion.py                 # Clase Operacion
 │   ├── asiento.py                   # Clase Asiento
 │   └── reserva.py                   # Clase Reserva (une Persona + Pelicula + Asiento)
 └── estructuras/
@@ -37,7 +39,10 @@ cine-santa-fe/
     ├── vector_peliculas.py          # Vector: catálogo de películas
     ├── matriz_asientos.py           # Matriz: distribución de asientos por sala
     ├── lista_simple_reservas.py     # Lista enlazada simple: reservas activas
-    └── lista_doble_historial.py     # Lista enlazada doble: historial de reservas
+    ├── lista_doble_historial.py     # Lista enlazada doble: historial de reservas
+    ├── pila_operaciones.py          # Pila: gestión de operaciones
+    ├── cola_espera.py               # Cola: funciona como lista de espera
+    ├── arbol.py                     # Arbol: recomienda películas según tiempo disponible y género 
 ```
 
 ## Estructuras de datos
@@ -48,9 +53,9 @@ cine-santa-fe/
 | **Matriz** | ✅ Implementada | `estructuras/matriz_asientos.py` | Distribución de asientos de una sala |
 | **Lista enlazada simple** | ✅ Implementada | `estructuras/lista_simple_reservas.py` | Reservas activas (inserción por la cabeza, O(1)) |
 | **Lista enlazada doble** | ✅ Implementada | `estructuras/lista_doble_historial.py` | Historial de reservas, recorrible en ambos sentidos |
-| **Pila** | 🔜 Planeada | `estructuras/pila_operaciones.py` | Registro de las últimas operaciones (agregar, reservar, cancelar), con opción de deshacer la última acción |
-| **Cola** | 🔜 Planeada | `estructuras/cola_espera.py` | Fila de espera FIFO para reservar, simulando alta demanda: los clientes se atienden en el mismo orden en que llegaron |
-| **Árbol (BST)** | 🔜 Planeada | `estructuras/arbol_reservas.py` | Búsqueda de una reserva por número de documento, más eficiente que recorrer toda la lista enlazada |
+| **Pila** | ✅ Implementada  | `estructuras/pila_operaciones.py` | Registro de las últimas operaciones (agregar, reservar, cancelar), con opción de deshacer la última acción |
+| **Cola** | ✅ Implementada  | `estructuras/cola_espera.py` | Fila de espera FIFO para reservar, simulando alta demanda: los clientes se atienden en el mismo orden en que llegaron |
+| **Árbol (BST)** | ✅ Implementada  | `estructuras/arbol_reservas.py` | Recomendación de peliculas en cartelera según el tiempo y los gustos del cliente |
 
 *(Grafos: descartado por decisión del equipo.)*
 
@@ -64,8 +69,12 @@ cine-santa-fe/
 6. Reservar asiento
 7. Ver reservas
 8. Cancelar reserva
-9. Ver historial
-10. Salir
+9. Ver historial de reservas canceladas
+10. Ver últimas operaciones
+11. Deshacer última operación
+12. Recomendar película
+13. Ver árbol de recomendación
+14. Salir
 
 ## Reparto de trabajo
 
